@@ -1,9 +1,84 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'tela_inicial.dart';
 import 'tela_cadastro.dart';
 
-class TelaLogin extends StatelessWidget {
+class TelaLogin extends StatefulWidget {
   const TelaLogin({super.key});
+
+  @override
+  State<TelaLogin> createState() => _TelaLoginState();
+}
+
+class _TelaLoginState extends State<TelaLogin> {
+  // Controladores para capturar e-mail e senha
+  final _emailController = TextEditingController();
+  final _senhaController = TextEditingController();
+
+  // Variável para mostrar o ícone de carregamento no botão
+  bool _estaCarregando = false;
+
+  Future<void> realizarLogin() async {
+    // Inicia a animação de carregamento
+    setState(() {
+      _estaCarregando = true;
+    });
+
+    // URL da sua API no XAMPP (mantenha o seu IP atualizado)
+    var url = Uri.parse('http://192.168.237.64/ecocoleta/login.php');
+
+    try {
+      var resposta = await http.post(
+        url,
+        body: {'email': _emailController.text, 'senha': _senhaController.text},
+      );
+
+      // Decodifica a resposta JSON que vem do PHP
+      var dados = json.decode(resposta.body);
+
+      if (dados['status'] == 'sucesso') {
+        // Login realizado com sucesso!
+        if (!mounted) return;
+
+        // Extrai o nome do usuário do JSON para passar para a próxima tela
+        String nomeParaEnviar = dados['usuario']['nome'];
+
+        // Navega para a Tela Inicial passando o nome
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TelaInicial(nomeUsuario: nomeParaEnviar),
+          ),
+        );
+      } else {
+        // Mostra o erro retornado pelo PHP (ex: "Senha incorreta")
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(dados['mensagem']),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      // Caso o servidor esteja desligado ou o IP mude
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro de conexão. Verifique o servidor XAMPP.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      // Para a animação de carregamento, dando erro ou sucesso
+      if (mounted) {
+        setState(() {
+          _estaCarregando = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +102,11 @@ class TelaLogin extends StatelessWidget {
               ),
               const SizedBox(height: 40),
 
-              const TextField(
-                decoration: InputDecoration(
+              // Campo de E-mail
+              TextField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
                   labelText: 'E-mail',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.email),
@@ -36,63 +114,56 @@ class TelaLogin extends StatelessWidget {
               ),
               const SizedBox(height: 15),
 
-              const TextField(
+              // Campo de Senha
+              TextField(
+                controller: _senhaController,
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Senha',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.lock),
                 ),
               ),
 
-              // --- NOVO: BOTÃO ESQUECI MINHA SENHA ---
+              // Botão Esqueci minha senha
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {
-                    // Aviso temporário até criarmos o sistema de e-mail no PHP
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Sistema de recuperação de senha em construção!',
-                        ),
-                        backgroundColor: Colors.orange,
-                      ),
+                      const SnackBar(content: Text('Funcionalidade em breve!')),
                     );
                   },
                   child: const Text(
                     'Esqueci minha senha?',
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(color: Colors.green),
                   ),
                 ),
               ),
 
-              // ---------------------------------------
-              const SizedBox(height: 15),
+              const SizedBox(height: 20),
 
+              // Botão Entrar
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green[700],
-                  minimumSize: const Size(double.infinity, 50),
+                  minimumSize: const Size(double.infinity, 55),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TelaInicial(),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Entrar',
-                  style: TextStyle(color: Colors.white, fontSize: 18),
-                ),
+                onPressed: _estaCarregando ? null : realizarLogin,
+                child: _estaCarregando
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        'Entrar',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
               ),
-              const SizedBox(height: 15),
 
+              const SizedBox(height: 20),
+
+              // Botão para Ir para o Cadastro
               TextButton(
                 onPressed: () {
                   Navigator.push(
@@ -104,7 +175,7 @@ class TelaLogin extends StatelessWidget {
                 },
                 child: const Text(
                   'Ainda não tem uma conta? Cadastre-se',
-                  style: TextStyle(color: Colors.green),
+                  style: TextStyle(color: Colors.green, fontSize: 16),
                 ),
               ),
             ],
