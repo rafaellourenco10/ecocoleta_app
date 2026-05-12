@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
-// Agora usamos StatefulWidget porque a tela muda de estado (carregando, digitando, etc)
 class TelaFormulario extends StatefulWidget {
   const TelaFormulario({super.key});
 
@@ -10,60 +11,122 @@ class TelaFormulario extends StatefulWidget {
 }
 
 class _TelaFormularioState extends State<TelaFormulario> {
-  // Controladores para capturar o que o usuário digitar
-  final _materialController = TextEditingController();
+  // Controladores de texto
   final _enderecoController = TextEditingController();
-  bool _estaCarregando = false; // Controla a animação do botão
+  final _descricaoController = TextEditingController();
 
-  // Função que envia os dados para o XAMPP
+  // Variáveis para seleção e imagem
+  String? _tipoResiduo;
+  String? _volume;
+  String? _acondicionamento;
+  File? _imagemSelecionada;
+
+  // Listas de opções
+  final List<String> _tipos = [
+    'Orgânico',
+    'Reciclável',
+    'Construção Civil',
+    'Infectante',
+    'Eletrônico',
+  ];
+  final List<String> _volumes = [
+    'Até 0,5m³',
+    'Entre 0,5m³ e 1m³',
+    'Acima de 1m³',
+  ];
+  final List<String> _formasAcondicionamento = [
+    'Contêiner',
+    'Sacos Plásticos',
+    'Enfardado',
+    'Solto',
+  ];
+
+  bool _estaCarregando = false;
+
+  // Função para abrir a câmera e tirar foto
+  Future<void> _tirarFoto() async {
+    final picker = ImagePicker();
+    final foto = await picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 50, // Reduz qualidade para não pesar no envio
+    );
+
+    if (foto != null) {
+      setState(() {
+        _imagemSelecionada = File(foto.path);
+      });
+    }
+  }
+
   Future<void> enviarDados() async {
-    setState(() {
-      _estaCarregando = true; // Liga a bolinha girando
-    });
+    // Remove espaços vazios acidentais
+    String endereco = _enderecoController.text.trim();
+    String descricao = _descricaoController.text.trim();
 
-    // O ENDEREÇO DA SUA MÁQUINA COM O SEU IP!
+    // Validação rigorosa
+    if (_tipoResiduo == null ||
+        _volume == null ||
+        _acondicionamento == null ||
+        endereco.isEmpty ||
+        descricao.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, preencha todos os campos e a descrição!'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _estaCarregando = true);
+
+    // Endereço do seu servidor (Verifique se o IP 192.168.237.64 ainda é o mesmo)
     var url = Uri.parse('http://192.168.237.64/ecocoleta/cadastrar_coleta.php');
 
     try {
       var resposta = await http.post(
         url,
         body: {
-          'material': _materialController.text,
-          'endereco': _enderecoController.text,
+          'usuario_id': '1', // Temporário: ID fixo para teste
+          'tipo_residuo': _tipoResiduo,
+          'volume': _volume,
+          'acondicionamento': _acondicionamento,
+          'descricao_item': descricao,
+          'endereco': endereco,
+          'url_foto': _imagemSelecionada != null ? 'foto_capturada.jpg' : '',
         },
       );
 
       if (resposta.statusCode == 200) {
-        // Se deu certo, mostra um aviso verde e limpa a tela
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Coleta solicitada com sucesso!'),
+            content: Text('Solicitação enviada com sucesso!'),
             backgroundColor: Colors.green,
           ),
         );
-        _materialController.clear();
-        _enderecoController.clear();
+        Navigator.pop(context); // Volta para a tela inicial
       } else {
-        // Se o servidor reclamou
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro no servidor: ${resposta.statusCode}'),
+            content: Text('Erro no servidor: ${resposta.body}'),
             backgroundColor: Colors.red,
           ),
         );
       }
     } catch (e) {
-      // Se o celular não achou o computador (ex: fora do wifi)
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erro de conexão. Verifique o Wi-Fi e o XAMPP.'),
+          content: Text('Erro de conexão. Verifique o servidor XAMPP.'),
           backgroundColor: Colors.red,
         ),
       );
     } finally {
-      setState(() {
-        _estaCarregando = false; // Desliga a bolinha girando
-      });
+      if (mounted) {
+        setState(() => _estaCarregando = false);
+      }
     }
   }
 
@@ -71,62 +134,143 @@ class _TelaFormularioState extends State<TelaFormulario> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Nova Coleta', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Nova Solicitação',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.green[700],
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ), // Deixa a setinha de voltar branca
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Área de captura de foto
             const Text(
-              'O que você quer descartar?',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              "Foto do Resíduo (Opcional)",
+              style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
-            TextField(
-              controller: _materialController,
-              decoration: const InputDecoration(
-                hintText: 'Ex: Eletrônicos, Papelão, Vidro...',
-                border: OutlineInputBorder(),
+            GestureDetector(
+              onTap: _tirarFoto,
+              child: Container(
+                height: 180,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  border: Border.all(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: _imagemSelecionada == null
+                    ? const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.camera_enhance,
+                            size: 50,
+                            color: Colors.green,
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "Toque para abrir a câmera",
+                            style: TextStyle(color: Colors.green),
+                          ),
+                        ],
+                      )
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.file(
+                          _imagemSelecionada!,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
               ),
             ),
-            const SizedBox(height: 20),
-            const Text(
-              'Onde devemos buscar?',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            const SizedBox(height: 25),
+
+            // Seleção de Tipo
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Tipo de Resíduo',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.category),
+              ),
+              value: _tipoResiduo,
+              items: _tipos
+                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                  .toList(),
+              onChanged: (val) => setState(() => _tipoResiduo = val),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
+
+            // Seleção de Volume
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Volume Estimado',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.assessment),
+              ),
+              value: _volume,
+              items: _volumes
+                  .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+                  .toList(),
+              onChanged: (val) => setState(() => _volume = val),
+            ),
+            const SizedBox(height: 15),
+
+            // Seleção de Acondicionamento
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: 'Acondicionamento',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.inventory_2),
+              ),
+              value: _acondicionamento,
+              items: _formasAcondicionamento
+                  .map((a) => DropdownMenuItem(value: a, child: Text(a)))
+                  .toList(),
+              onChanged: (val) => setState(() => _acondicionamento = val),
+            ),
+            const SizedBox(height: 15),
+
+            // Campo de Descrição (Essencial para o Banco de Dados)
+            TextField(
+              controller: _descricaoController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Descrição detalhada dos itens',
+                hintText: 'Ex: Restos de poda de árvore e móveis velhos...',
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+            ),
+            const SizedBox(height: 15),
+
+            // Campo de Endereço
             TextField(
               controller: _enderecoController,
               decoration: const InputDecoration(
-                hintText: 'Ex: Rua das Flores, 123',
+                labelText: 'Endereço da Coleta',
                 border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.location_on),
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 30),
 
-            // Botão que muda de texto para bolinha de carregamento
+            // Botão Confirmar
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green[700],
                 padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
               onPressed: _estaCarregando ? null : enviarDados,
               child: _estaCarregando
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
+                  ? const CircularProgressIndicator(color: Colors.white)
                   : const Text(
-                      'Enviar Solicitação',
+                      'Confirmar Solicitação',
                       style: TextStyle(color: Colors.white, fontSize: 18),
                     ),
             ),
