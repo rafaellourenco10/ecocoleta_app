@@ -3,11 +3,11 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'tela_login.dart';
 import 'tela_formulario.dart';
-import 'tela_perfil.dart'; // IMPORTANTE: Importe a nova tela aqui
+import 'tela_perfil.dart';
 
 class TelaInicial extends StatefulWidget {
   final String nomeUsuario;
-  final String usuarioId; // Recebe o ID do banco de dados
+  final String usuarioId;
 
   const TelaInicial({
     super.key,
@@ -29,7 +29,6 @@ class _TelaInicialState extends State<TelaInicial> {
   }
 
   Future<void> _contarPendentes() async {
-    // Agora filtramos as coletas pelo ID do usuário logado
     var url = Uri.parse(
       'http://192.168.237.64/ecocoleta/listar_coletas.php?usuario_id=${widget.usuarioId}',
     );
@@ -70,7 +69,6 @@ class _TelaInicialState extends State<TelaInicial> {
       ),
       body: Column(
         children: [
-          // Header com degradê verde
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
@@ -100,10 +98,7 @@ class _TelaInicialState extends State<TelaInicial> {
               ],
             ),
           ),
-
           const SizedBox(height: 30),
-
-          // Grid de Opções do Dashboard
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -112,7 +107,6 @@ class _TelaInicialState extends State<TelaInicial> {
                 crossAxisSpacing: 20,
                 mainAxisSpacing: 20,
                 children: [
-                  // Solicitar Coleta
                   _buildMenuButton(
                     context,
                     title: 'Solicitar Coleta',
@@ -128,8 +122,6 @@ class _TelaInicialState extends State<TelaInicial> {
                       _contarPendentes();
                     },
                   ),
-
-                  // Ver Coletas (Com Badge de quantidade)
                   _buildMenuButton(
                     context,
                     title: 'Minhas Coletas',
@@ -140,8 +132,6 @@ class _TelaInicialState extends State<TelaInicial> {
                         : null,
                     onTap: () => _mostrarListaColetas(context),
                   ),
-
-                  // MEU PERFIL (Agora funcional!)
                   _buildMenuButton(
                     context,
                     title: 'Meu Perfil',
@@ -157,8 +147,6 @@ class _TelaInicialState extends State<TelaInicial> {
                       );
                     },
                   ),
-
-                  // Dicas
                   _buildMenuButton(
                     context,
                     title: 'Dicas de Descarte',
@@ -175,7 +163,6 @@ class _TelaInicialState extends State<TelaInicial> {
     );
   }
 
-  // Widget auxiliar para os botões do menu
   Widget _buildMenuButton(
     BuildContext context, {
     required String title,
@@ -244,7 +231,6 @@ class _TelaInicialState extends State<TelaInicial> {
     );
   }
 
-  // Abre a lista em um BottomSheet
   void _mostrarListaColetas(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -268,7 +254,7 @@ class _TelaInicialState extends State<TelaInicial> {
   }
 }
 
-// Widget Interno para a Lista
+// COMPONENTE DA LISTA (AQUI VOLTAMOS COM O EDITAR E APAGAR)
 class _ListaColetasWidget extends StatefulWidget {
   final ScrollController controller;
   final String usuarioId;
@@ -307,6 +293,97 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
     }
   }
 
+  Future<void> _deletar(String id) async {
+    var url = Uri.parse('http://192.168.237.64/ecocoleta/deletar_coleta.php');
+    await http.post(url, body: {'id': id});
+    _buscar();
+  }
+
+  // Abre as opções ao tocar no item da lista
+  void _mostrarOpcoes(Map coleta) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Wrap(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit, color: Colors.blue),
+            title: const Text('Editar Solicitação'),
+            onTap: () {
+              Navigator.pop(context);
+              _dialogoEdicao(coleta);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.red),
+            title: const Text('Excluir Solicitação'),
+            onTap: () {
+              Navigator.pop(context);
+              _deletar(coleta['id'].toString());
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _dialogoEdicao(Map coleta) {
+    final editaTipo = TextEditingController(text: coleta['tipo_residuo']);
+    final editaDesc = TextEditingController(text: coleta['descricao_item']);
+    final editaEnd = TextEditingController(text: coleta['endereco']);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar Coleta'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: editaTipo,
+                decoration: const InputDecoration(labelText: 'Tipo'),
+              ),
+              TextField(
+                controller: editaDesc,
+                decoration: const InputDecoration(labelText: 'Descrição'),
+              ),
+              TextField(
+                controller: editaEnd,
+                decoration: const InputDecoration(labelText: 'Endereço'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              var url = Uri.parse(
+                'http://192.168.237.64/ecocoleta/editar_coleta.php',
+              );
+              await http.post(
+                url,
+                body: {
+                  'id': coleta['id'].toString(),
+                  'tipo_residuo': editaTipo.text,
+                  'descricao_item': editaDesc.text,
+                  'endereco': editaEnd.text,
+                },
+              );
+              if (!mounted) return;
+              Navigator.pop(context);
+              _buscar();
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -335,11 +412,27 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
               : ListView.builder(
                   controller: widget.controller,
                   itemCount: _coletas.length,
-                  itemBuilder: (context, i) => ListTile(
-                    leading: const Icon(Icons.recycling, color: Colors.green),
-                    title: Text(_coletas[i]['tipo_residuo'] ?? 'Material'),
-                    subtitle: Text(_coletas[i]['endereco'] ?? ''),
-                    trailing: const Icon(Icons.chevron_right),
+                  itemBuilder: (context, i) => Card(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 5,
+                    ),
+                    child: ListTile(
+                      onTap: () => _mostrarOpcoes(
+                        _coletas[i],
+                      ), // TOQUE PARA EDITAR/APAGAR
+                      leading: const CircleAvatar(
+                        backgroundColor: Colors.green,
+                        child: Icon(
+                          Icons.recycling,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(_coletas[i]['tipo_residuo'] ?? 'Material'),
+                      subtitle: Text(_coletas[i]['endereco'] ?? ''),
+                      trailing: const Icon(Icons.more_vert),
+                    ),
                   ),
                 ),
         ),
