@@ -12,20 +12,16 @@ class TelaLogin extends StatefulWidget {
 }
 
 class _TelaLoginState extends State<TelaLogin> {
-  // Controladores para capturar e-mail e senha
   final _emailController = TextEditingController();
   final _senhaController = TextEditingController();
-
-  // Variável para mostrar o ícone de carregamento no botão
   bool _estaCarregando = false;
 
   Future<void> realizarLogin() async {
-    // Inicia a animação de carregamento
     setState(() {
       _estaCarregando = true;
     });
 
-    // URL da sua API no XAMPP (mantenha o seu IP atualizado)
+    // Mantenha o IP do seu servidor XAMPP atualizado
     var url = Uri.parse('http://192.168.237.64/ecocoleta/login.php');
 
     try {
@@ -34,25 +30,27 @@ class _TelaLoginState extends State<TelaLogin> {
         body: {'email': _emailController.text, 'senha': _senhaController.text},
       );
 
-      // Decodifica a resposta JSON que vem do PHP
       var dados = json.decode(resposta.body);
 
       if (dados['status'] == 'sucesso') {
-        // Login realizado com sucesso!
         if (!mounted) return;
 
-        // Extrai o nome do usuário do JSON para passar para a próxima tela
-        String nomeParaEnviar = dados['usuario']['nome'];
+        // PADRÃO SÊNIOR: Capturando os dados reais vindos do banco de dados
+        // O PHP deve retornar o ID e o Nome dentro do objeto 'usuario'
+        String idUsuario = dados['usuario']['id'].toString();
+        String nomeUsuario = dados['usuario']['nome'];
 
-        // Navega para a Tela Inicial passando o nome
+        // Navega para a Inicial enviando o ID e o Nome
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => TelaInicial(nomeUsuario: nomeParaEnviar),
+            builder: (context) => TelaInicial(
+              nomeUsuario: nomeUsuario,
+              usuarioId: idUsuario, // Enviando o ID para as próximas telas
+            ),
           ),
         );
       } else {
-        // Mostra o erro retornado pelo PHP (ex: "Senha incorreta")
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -62,7 +60,6 @@ class _TelaLoginState extends State<TelaLogin> {
         );
       }
     } catch (e) {
-      // Caso o servidor esteja desligado ou o IP mude
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -71,7 +68,6 @@ class _TelaLoginState extends State<TelaLogin> {
         ),
       );
     } finally {
-      // Para a animação de carregamento, dando erro ou sucesso
       if (mounted) {
         setState(() {
           _estaCarregando = false;
@@ -102,7 +98,6 @@ class _TelaLoginState extends State<TelaLogin> {
               ),
               const SizedBox(height: 40),
 
-              // Campo de E-mail
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -114,7 +109,6 @@ class _TelaLoginState extends State<TelaLogin> {
               ),
               const SizedBox(height: 15),
 
-              // Campo de Senha
               TextField(
                 controller: _senhaController,
                 obscureText: true,
@@ -124,26 +118,8 @@ class _TelaLoginState extends State<TelaLogin> {
                   prefixIcon: Icon(Icons.lock),
                 ),
               ),
+              const SizedBox(height: 25),
 
-              // Botão Esqueci minha senha
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Funcionalidade em breve!')),
-                    );
-                  },
-                  child: const Text(
-                    'Esqueci minha senha?',
-                    style: TextStyle(color: Colors.green),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Botão Entrar
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green[700],
@@ -163,7 +139,6 @@ class _TelaLoginState extends State<TelaLogin> {
 
               const SizedBox(height: 20),
 
-              // Botão para Ir para o Cadastro
               TextButton(
                 onPressed: () {
                   Navigator.push(

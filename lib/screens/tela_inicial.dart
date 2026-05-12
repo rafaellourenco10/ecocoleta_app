@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
-import 'tela_login.dart';
-import 'tela_formulario.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'tela_login.dart';
+import 'tela_formulario.dart';
+import 'tela_perfil.dart'; // IMPORTANTE: Importe a nova tela aqui
 
 class TelaInicial extends StatefulWidget {
   final String nomeUsuario;
-  const TelaInicial({super.key, required this.nomeUsuario});
+  final String usuarioId; // Recebe o ID do banco de dados
+
+  const TelaInicial({
+    super.key,
+    required this.nomeUsuario,
+    required this.usuarioId,
+  });
 
   @override
   State<TelaInicial> createState() => _TelaInicialState();
@@ -22,7 +29,10 @@ class _TelaInicialState extends State<TelaInicial> {
   }
 
   Future<void> _contarPendentes() async {
-    var url = Uri.parse('http://192.168.237.64/ecocoleta/listar_coletas.php');
+    // Agora filtramos as coletas pelo ID do usuário logado
+    var url = Uri.parse(
+      'http://192.168.237.64/ecocoleta/listar_coletas.php?usuario_id=${widget.usuarioId}',
+    );
     try {
       var resposta = await http.get(url);
       if (resposta.statusCode == 200) {
@@ -32,7 +42,7 @@ class _TelaInicialState extends State<TelaInicial> {
         });
       }
     } catch (e) {
-      debugPrint("Erro ao contar: $e");
+      debugPrint("Erro ao contar coletas: $e");
     }
   }
 
@@ -60,6 +70,7 @@ class _TelaInicialState extends State<TelaInicial> {
       ),
       body: Column(
         children: [
+          // Header com degradê verde
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
@@ -89,7 +100,10 @@ class _TelaInicialState extends State<TelaInicial> {
               ],
             ),
           ),
+
           const SizedBox(height: 30),
+
+          // Grid de Opções do Dashboard
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -98,6 +112,7 @@ class _TelaInicialState extends State<TelaInicial> {
                 crossAxisSpacing: 20,
                 mainAxisSpacing: 20,
                 children: [
+                  // Solicitar Coleta
                   _buildMenuButton(
                     context,
                     title: 'Solicitar Coleta',
@@ -113,6 +128,8 @@ class _TelaInicialState extends State<TelaInicial> {
                       _contarPendentes();
                     },
                   ),
+
+                  // Ver Coletas (Com Badge de quantidade)
                   _buildMenuButton(
                     context,
                     title: 'Minhas Coletas',
@@ -123,13 +140,25 @@ class _TelaInicialState extends State<TelaInicial> {
                         : null,
                     onTap: () => _mostrarListaColetas(context),
                   ),
+
+                  // MEU PERFIL (Agora funcional!)
                   _buildMenuButton(
                     context,
                     title: 'Meu Perfil',
                     icon: Icons.person_outline,
                     color: Colors.orange.shade600,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TelaPerfil(usuarioId: widget.usuarioId),
+                        ),
+                      );
+                    },
                   ),
+
+                  // Dicas
                   _buildMenuButton(
                     context,
                     title: 'Dicas de Descarte',
@@ -146,6 +175,7 @@ class _TelaInicialState extends State<TelaInicial> {
     );
   }
 
+  // Widget auxiliar para os botões do menu
   Widget _buildMenuButton(
     BuildContext context, {
     required String title,
@@ -214,6 +244,7 @@ class _TelaInicialState extends State<TelaInicial> {
     );
   }
 
+  // Abre a lista em um BottomSheet
   void _mostrarListaColetas(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -221,25 +252,30 @@ class _TelaInicialState extends State<TelaInicial> {
       backgroundColor: Colors.transparent,
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.9,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
         expand: false,
         builder: (_, controller) => Container(
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
           ),
-          child: _ListaColetasWidget(controller: controller),
+          child: _ListaColetasWidget(
+            controller: controller,
+            usuarioId: widget.usuarioId,
+          ),
         ),
       ),
     ).then((_) => _contarPendentes());
   }
 }
 
-// WIDGET DA LISTA COM FUNÇÕES DE EDITAR E EXCLUIR
+// Widget Interno para a Lista
 class _ListaColetasWidget extends StatefulWidget {
   final ScrollController controller;
-  const _ListaColetasWidget({required this.controller});
+  final String usuarioId;
+  const _ListaColetasWidget({
+    required this.controller,
+    required this.usuarioId,
+  });
 
   @override
   State<_ListaColetasWidget> createState() => _ListaColetasWidgetState();
@@ -257,7 +293,9 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
 
   Future<void> _buscar() async {
     setState(() => _carregando = true);
-    var url = Uri.parse('http://192.168.237.64/ecocoleta/listar_coletas.php');
+    var url = Uri.parse(
+      'http://192.168.237.64/ecocoleta/listar_coletas.php?usuario_id=${widget.usuarioId}',
+    );
     try {
       var res = await http.get(url);
       setState(() {
@@ -267,96 +305,6 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
     } catch (e) {
       setState(() => _carregando = false);
     }
-  }
-
-  Future<void> _deletar(String id) async {
-    var url = Uri.parse('http://192.168.237.64/ecocoleta/deletar_coleta.php');
-    await http.post(url, body: {'id': id});
-    _buscar();
-  }
-
-  void _mostrarOpcoes(Map coleta) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Wrap(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.edit, color: Colors.blue),
-            title: const Text('Editar'),
-            onTap: () {
-              Navigator.pop(context);
-              _dialogoEdicao(coleta);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.delete, color: Colors.red),
-            title: const Text('Excluir'),
-            onTap: () {
-              Navigator.pop(context);
-              _deletar(coleta['id'].toString());
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _dialogoEdicao(Map coleta) {
-    final editaTipo = TextEditingController(text: coleta['tipo_residuo']);
-    final editaDesc = TextEditingController(text: coleta['descricao_item']);
-    final editaEnd = TextEditingController(text: coleta['endereco']);
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Editar Solicitação'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: editaTipo,
-                decoration: const InputDecoration(labelText: 'Tipo'),
-              ),
-              TextField(
-                controller: editaDesc,
-                decoration: const InputDecoration(labelText: 'Descrição'),
-              ),
-              TextField(
-                controller: editaEnd,
-                decoration: const InputDecoration(labelText: 'Endereço'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              var url = Uri.parse(
-                'http://192.168.237.64/ecocoleta/editar_coleta.php',
-              );
-              await http.post(
-                url,
-                body: {
-                  'id': coleta['id'].toString(),
-                  'tipo_residuo': editaTipo.text,
-                  'descricao_item': editaDesc.text,
-                  'endereco': editaEnd.text,
-                },
-              );
-              if (!mounted) return;
-              Navigator.pop(context);
-              _buscar();
-            },
-            child: const Text('Salvar'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -387,25 +335,11 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
               : ListView.builder(
                   controller: widget.controller,
                   itemCount: _coletas.length,
-                  itemBuilder: (context, i) => Card(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 5,
-                    ),
-                    child: ListTile(
-                      onTap: () => _mostrarOpcoes(_coletas[i]),
-                      leading: const CircleAvatar(
-                        backgroundColor: Colors.green,
-                        child: Icon(
-                          Icons.recycling,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                      title: Text(_coletas[i]['tipo_residuo'] ?? 'Material'),
-                      subtitle: Text(_coletas[i]['endereco'] ?? ''),
-                      trailing: const Icon(Icons.more_vert),
-                    ),
+                  itemBuilder: (context, i) => ListTile(
+                    leading: const Icon(Icons.recycling, color: Colors.green),
+                    title: Text(_coletas[i]['tipo_residuo'] ?? 'Material'),
+                    subtitle: Text(_coletas[i]['endereco'] ?? ''),
+                    trailing: const Icon(Icons.chevron_right),
                   ),
                 ),
         ),
