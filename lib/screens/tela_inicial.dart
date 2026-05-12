@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'tela_login.dart';
 import 'tela_formulario.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class TelaInicial extends StatefulWidget {
   final String nomeUsuario;
@@ -13,76 +13,303 @@ class TelaInicial extends StatefulWidget {
 }
 
 class _TelaInicialState extends State<TelaInicial> {
+  int _quantidadePendentes = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _contarPendentes();
+  }
+
+  Future<void> _contarPendentes() async {
+    var url = Uri.parse('http://192.168.237.64/ecocoleta/listar_coletas.php');
+    try {
+      var resposta = await http.get(url);
+      if (resposta.statusCode == 200) {
+        List dados = json.decode(resposta.body);
+        setState(() {
+          _quantidadePendentes = dados.length;
+        });
+      }
+    } catch (e) {
+      debugPrint("Erro ao contar: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text(
+          'EcoColeta',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.green[700],
+        centerTitle: true,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.exit_to_app, color: Colors.white),
+            onPressed: () => Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const TelaLogin()),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.green[700],
+              borderRadius: const BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Olá, ${widget.nomeUsuario}!',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'O que você deseja fazer hoje?',
+                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 30),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+                children: [
+                  _buildMenuButton(
+                    context,
+                    title: 'Solicitar Coleta',
+                    icon: Icons.add_location_alt_rounded,
+                    color: Colors.green.shade600,
+                    onTap: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TelaFormulario(),
+                        ),
+                      );
+                      _contarPendentes();
+                    },
+                  ),
+                  _buildMenuButton(
+                    context,
+                    title: 'Minhas Coletas',
+                    icon: Icons.list_alt_rounded,
+                    color: Colors.blue.shade600,
+                    badge: _quantidadePendentes > 0
+                        ? _quantidadePendentes.toString()
+                        : null,
+                    onTap: () => _mostrarListaColetas(context),
+                  ),
+                  _buildMenuButton(
+                    context,
+                    title: 'Meu Perfil',
+                    icon: Icons.person_outline,
+                    color: Colors.orange.shade600,
+                    onTap: () {},
+                  ),
+                  _buildMenuButton(
+                    context,
+                    title: 'Dicas de Descarte',
+                    icon: Icons.lightbulb_outline,
+                    color: Colors.teal.shade600,
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuButton(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+    String? badge,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, size: 45, color: color),
+                  const SizedBox(height: 12),
+                  Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (badge != null)
+              Positioned(
+                right: 15,
+                top: 15,
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    badge,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _mostrarListaColetas(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        maxChildSize: 0.9,
+        minChildSize: 0.5,
+        expand: false,
+        builder: (_, controller) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+          ),
+          child: _ListaColetasWidget(controller: controller),
+        ),
+      ),
+    ).then((_) => _contarPendentes());
+  }
+}
+
+// WIDGET DA LISTA COM FUNÇÕES DE EDITAR E EXCLUIR
+class _ListaColetasWidget extends StatefulWidget {
+  final ScrollController controller;
+  const _ListaColetasWidget({required this.controller});
+
+  @override
+  State<_ListaColetasWidget> createState() => _ListaColetasWidgetState();
+}
+
+class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
   List _coletas = [];
   bool _carregando = true;
 
   @override
   void initState() {
     super.initState();
-    buscarColetas();
+    _buscar();
   }
 
-  Future<void> buscarColetas() async {
+  Future<void> _buscar() async {
     setState(() => _carregando = true);
     var url = Uri.parse('http://192.168.237.64/ecocoleta/listar_coletas.php');
     try {
-      var resposta = await http.get(url);
-      if (resposta.statusCode == 200) {
-        setState(() {
-          _coletas = json.decode(resposta.body);
-          _carregando = false;
-        });
-      }
+      var res = await http.get(url);
+      setState(() {
+        _coletas = json.decode(res.body);
+        _carregando = false;
+      });
     } catch (e) {
       setState(() => _carregando = false);
     }
   }
 
-  Future<void> deletarColeta(String id) async {
+  Future<void> _deletar(String id) async {
     var url = Uri.parse('http://192.168.237.64/ecocoleta/deletar_coleta.php');
     await http.post(url, body: {'id': id});
-    buscarColetas();
+    _buscar();
   }
 
-  // Função para mostrar o menu de opções (Editar/Excluir)
   void _mostrarOpcoes(Map coleta) {
     showModalBottomSheet(
       context: context,
-      builder: (context) {
-        return Wrap(
-          children: [
-            ListTile(
-              leading: const Icon(Icons.edit, color: Colors.blue),
-              title: const Text('Editar Solicitação'),
-              onTap: () {
-                Navigator.pop(context);
-                _mostrarDialogoEdicao(coleta);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('Excluir Solicitação'),
-              onTap: () {
-                Navigator.pop(context);
-                deletarColeta(coleta['id'].toString());
-              },
-            ),
-          ],
-        );
-      },
+      builder: (context) => Wrap(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit, color: Colors.blue),
+            title: const Text('Editar'),
+            onTap: () {
+              Navigator.pop(context);
+              _dialogoEdicao(coleta);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.red),
+            title: const Text('Excluir'),
+            onTap: () {
+              Navigator.pop(context);
+              _deletar(coleta['id'].toString());
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  // Dialogo para editar os campos
-  void _mostrarDialogoEdicao(Map coleta) {
+  void _dialogoEdicao(Map coleta) {
     final editaTipo = TextEditingController(text: coleta['tipo_residuo']);
-    final editaEndereco = TextEditingController(text: coleta['endereco']);
     final editaDesc = TextEditingController(text: coleta['descricao_item']);
+    final editaEnd = TextEditingController(text: coleta['endereco']);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Editar Coleta'),
+        title: const Text('Editar Solicitação'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -96,7 +323,7 @@ class _TelaInicialState extends State<TelaInicial> {
                 decoration: const InputDecoration(labelText: 'Descrição'),
               ),
               TextField(
-                controller: editaEndereco,
+                controller: editaEnd,
                 decoration: const InputDecoration(labelText: 'Endereço'),
               ),
             ],
@@ -118,12 +345,12 @@ class _TelaInicialState extends State<TelaInicial> {
                   'id': coleta['id'].toString(),
                   'tipo_residuo': editaTipo.text,
                   'descricao_item': editaDesc.text,
-                  'endereco': editaEndereco.text,
+                  'endereco': editaEnd.text,
                 },
               );
               if (!mounted) return;
               Navigator.pop(context);
-              buscarColetas();
+              _buscar();
             },
             child: const Text('Salvar'),
           ),
@@ -134,79 +361,55 @@ class _TelaInicialState extends State<TelaInicial> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Minhas Coletas',
-          style: TextStyle(color: Colors.white),
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        Container(
+          width: 40,
+          height: 4,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
-        backgroundColor: Colors.green[700],
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: buscarColetas,
+        const Padding(
+          padding: EdgeInsets.all(20),
+          child: Text(
+            "Minhas Solicitações",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          IconButton(
-            icon: const Icon(Icons.exit_to_app, color: Colors.white),
-            onPressed: () => Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const TelaLogin()),
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            width: double.infinity,
-            color: Colors.green[50],
-            child: Text(
-              'Bem-vindo, ${widget.nomeUsuario}!',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Expanded(
-            child: _carregando
-                ? const Center(child: CircularProgressIndicator())
-                : _coletas.isEmpty
-                ? const Center(child: Text("Nenhuma coleta encontrada."))
-                : ListView.builder(
-                    padding: const EdgeInsets.all(8),
-                    itemCount: _coletas.length,
-                    itemBuilder: (context, index) {
-                      var coleta = _coletas[index];
-                      return Card(
-                        child: ListTile(
-                          onTap: () =>
-                              _mostrarOpcoes(coleta), // Abre o menu ao tocar
-                          leading: const Icon(
-                            Icons.location_on,
-                            color: Colors.green,
-                          ),
-                          title: Text(coleta['tipo_residuo'] ?? 'Sem Tipo'),
-                          subtitle: Text(coleta['endereco'] ?? ''),
-                          trailing: const Icon(Icons.more_vert),
+        ),
+        Expanded(
+          child: _carregando
+              ? const Center(child: CircularProgressIndicator())
+              : _coletas.isEmpty
+              ? const Center(child: Text("Nenhuma solicitação encontrada."))
+              : ListView.builder(
+                  controller: widget.controller,
+                  itemCount: _coletas.length,
+                  itemBuilder: (context, i) => Card(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 5,
+                    ),
+                    child: ListTile(
+                      onTap: () => _mostrarOpcoes(_coletas[i]),
+                      leading: const CircleAvatar(
+                        backgroundColor: Colors.green,
+                        child: Icon(
+                          Icons.recycling,
+                          color: Colors.white,
+                          size: 20,
                         ),
-                      );
-                    },
+                      ),
+                      title: Text(_coletas[i]['tipo_residuo'] ?? 'Material'),
+                      subtitle: Text(_coletas[i]['endereco'] ?? ''),
+                      trailing: const Icon(Icons.more_vert),
+                    ),
                   ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TelaFormulario()),
-          );
-          buscarColetas();
-        },
-        label: const Text('Nova Coleta', style: TextStyle(color: Colors.white)),
-        icon: const Icon(Icons.add, color: Colors.white),
-        backgroundColor: Colors.green[700],
-      ),
+                ),
+        ),
+      ],
     );
   }
 }
