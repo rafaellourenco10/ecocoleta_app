@@ -5,6 +5,7 @@ import '../core/api_constants.dart';
 import 'tela_login.dart';
 import 'tela_formulario.dart';
 import 'tela_perfil.dart';
+import 'tela_dicas.dart';
 
 class TelaInicial extends StatefulWidget {
   final String nomeUsuario;
@@ -151,7 +152,14 @@ class _TelaInicialState extends State<TelaInicial> {
                     title: 'Dicas de Descarte',
                     icon: Icons.lightbulb_outline,
                     color: Colors.teal.shade600,
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const TelaDicas(),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
