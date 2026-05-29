@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../core/api_constants.dart';
 
 class TelaPerfil extends StatefulWidget {
   final String usuarioId;
@@ -27,9 +28,7 @@ class _TelaPerfilState extends State<TelaPerfil> {
 
   // Busca os dados do usuário no MySQL via PHP
   Future<void> _buscarDadosPerfil() async {
-    var url = Uri.parse(
-      'http://192.168.237.64/ecocoleta/obter_perfil.php?id=${widget.usuarioId}',
-    );
+    var url = Uri.parse(ApiConstants.obterPerfil(widget.usuarioId));
     try {
       var res = await http.get(url);
       var dados = json.decode(res.body);
@@ -49,17 +48,17 @@ class _TelaPerfilState extends State<TelaPerfil> {
   // Envia as alterações para o banco de dados
   Future<void> _atualizarPerfil() async {
     setState(() => _carregando = true);
-    var url = Uri.parse('http://192.168.237.64/ecocoleta/atualizar_perfil.php');
+    var url = Uri.parse(ApiConstants.atualizarPerfil(widget.usuarioId));
     try {
-      await http.post(
+      await http.put(
         url,
-        body: {
-          'id': widget.usuarioId,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
           'nome': _nomeController.text,
           'email': _emailController.text,
           'telefone': _telefoneController.text,
           'endereco': _enderecoController.text,
-        },
+        }),
       );
       setState(() {
         _editando = false;

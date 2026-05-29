@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../core/api_constants.dart';
 import 'tela_login.dart';
 import 'tela_formulario.dart';
 import 'tela_perfil.dart';
@@ -29,9 +30,7 @@ class _TelaInicialState extends State<TelaInicial> {
   }
 
   Future<void> _contarPendentes() async {
-    var url = Uri.parse(
-      'http://192.168.237.64/ecocoleta/listar_coletas.php?usuario_id=${widget.usuarioId}',
-    );
+    var url = Uri.parse(ApiConstants.listarColetas(widget.usuarioId));
     try {
       var resposta = await http.get(url);
       if (resposta.statusCode == 200) {
@@ -279,9 +278,7 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
 
   Future<void> _buscar() async {
     setState(() => _carregando = true);
-    var url = Uri.parse(
-      'http://192.168.237.64/ecocoleta/listar_coletas.php?usuario_id=${widget.usuarioId}',
-    );
+    var url = Uri.parse(ApiConstants.listarColetas(widget.usuarioId));
     try {
       var res = await http.get(url);
       setState(() {
@@ -294,8 +291,8 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
   }
 
   Future<void> _deletar(String id) async {
-    var url = Uri.parse('http://192.168.237.64/ecocoleta/deletar_coleta.php');
-    await http.post(url, body: {'id': id});
+    var url = Uri.parse(ApiConstants.deletarColeta(id));
+    await http.delete(url);
     _buscar();
   }
 
@@ -361,17 +358,15 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
           ),
           ElevatedButton(
             onPressed: () async {
-              var url = Uri.parse(
-                'http://192.168.237.64/ecocoleta/editar_coleta.php',
-              );
-              await http.post(
+              var url = Uri.parse(ApiConstants.editarColeta(coleta['id'].toString()));
+              await http.put(
                 url,
-                body: {
-                  'id': coleta['id'].toString(),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode({
                   'tipo_residuo': editaTipo.text,
                   'descricao_item': editaDesc.text,
                   'endereco': editaEnd.text,
-                },
+                }),
               );
               if (!mounted) return;
               Navigator.pop(context);

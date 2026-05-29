@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
+import 'dart:convert';
+import '../core/api_constants.dart';
 class TelaCadastro extends StatefulWidget {
   const TelaCadastro({super.key});
 
@@ -24,25 +25,28 @@ class _TelaCadastroState extends State<TelaCadastro> {
       _estaCarregando = true;
     });
 
-    // O IP da sua máquina
-    var url = Uri.parse(
-      'http://192.168.237.64/ecocoleta/cadastrar_usuario.php',
-    );
+    var url = Uri.parse(ApiConstants.registrarUsuario);
+    
+    var headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
 
     try {
       var resposta = await http.post(
         url,
-        body: {
+        headers: headers,
+        body: jsonEncode({
           'nome': _nomeController.text,
           'cpf_cnpj': _cpfCnpjController.text,
           'endereco': _enderecoController.text,
           'telefone': _telefoneController.text,
           'email': _emailController.text,
           'senha': _senhaController.text,
-        },
+        }),
       );
 
-      if (resposta.statusCode == 200) {
+      if (resposta.statusCode == 201) {
         // Mostra aviso de sucesso e volta para a tela de Login
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -52,9 +56,10 @@ class _TelaCadastroState extends State<TelaCadastro> {
         );
         Navigator.pop(context);
       } else {
+        var dados = json.decode(resposta.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro no servidor: ${resposta.statusCode}'),
+            content: Text(dados['error'] ?? 'Erro no servidor: ${resposta.statusCode}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -62,7 +67,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erro de conexão. Verifique o Wi-Fi e o XAMPP.'),
+          content: Text('Erro de conexão. Verifique se a API está rodando.'),
           backgroundColor: Colors.red,
         ),
       );

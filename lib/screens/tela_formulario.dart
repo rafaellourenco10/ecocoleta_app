@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'dart:convert';
+import '../core/api_constants.dart';
 
 class TelaFormulario extends StatefulWidget {
   const TelaFormulario({super.key});
@@ -80,13 +82,18 @@ class _TelaFormularioState extends State<TelaFormulario> {
 
     setState(() => _estaCarregando = true);
 
-    // Endereço do seu servidor (Verifique se o IP 192.168.237.64 ainda é o mesmo)
-    var url = Uri.parse('http://192.168.237.64/ecocoleta/cadastrar_coleta.php');
+    var url = Uri.parse(ApiConstants.cadastrarColeta);
+    
+    var headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
 
     try {
       var resposta = await http.post(
         url,
-        body: {
+        headers: headers,
+        body: jsonEncode({
           'usuario_id': '1', // Temporário: ID fixo para teste
           'tipo_residuo': _tipoResiduo,
           'volume': _volume,
@@ -94,10 +101,10 @@ class _TelaFormularioState extends State<TelaFormulario> {
           'descricao_item': descricao,
           'endereco': endereco,
           'url_foto': _imagemSelecionada != null ? 'foto_capturada.jpg' : '',
-        },
+        }),
       );
 
-      if (resposta.statusCode == 200) {
+      if (resposta.statusCode == 201) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -108,9 +115,10 @@ class _TelaFormularioState extends State<TelaFormulario> {
         Navigator.pop(context); // Volta para a tela inicial
       } else {
         if (!mounted) return;
+        var erro = json.decode(resposta.body);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro no servidor: ${resposta.body}'),
+            content: Text('Erro no servidor: ${erro['error'] ?? resposta.statusCode}'),
             backgroundColor: Colors.red,
           ),
         );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../core/api_constants.dart';
 import 'tela_inicial.dart';
 import 'tela_cadastro.dart';
 
@@ -17,63 +18,17 @@ class _TelaLoginState extends State<TelaLogin> {
   bool _estaCarregando = false;
 
   Future<void> realizarLogin() async {
-    setState(() {
-      _estaCarregando = true;
-    });
-
-    // Mantenha o IP do seu servidor XAMPP atualizado
-    var url = Uri.parse('http://192.168.237.64/ecocoleta/login.php');
-
-    try {
-      var resposta = await http.post(
-        url,
-        body: {'email': _emailController.text, 'senha': _senhaController.text},
-      );
-
-      var dados = json.decode(resposta.body);
-
-      if (dados['status'] == 'sucesso') {
-        if (!mounted) return;
-
-        // PADRÃO SÊNIOR: Capturando os dados reais vindos do banco de dados
-        // O PHP deve retornar o ID e o Nome dentro do objeto 'usuario'
-        String idUsuario = dados['usuario']['id'].toString();
-        String nomeUsuario = dados['usuario']['nome'];
-
-        // Navega para a Inicial enviando o ID e o Nome
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TelaInicial(
-              nomeUsuario: nomeUsuario,
-              usuarioId: idUsuario, // Enviando o ID para as próximas telas
-            ),
-          ),
-        );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(dados['mensagem']),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Erro de conexão. Verifique o servidor XAMPP.'),
-          backgroundColor: Colors.red,
+    // BYPASS TEMPORÁRIO PARA TESTES MENCIONADO PELO USUÁRIO
+    // Navega diretamente sem validar na API
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const TelaInicial(
+          nomeUsuario: 'Visitante (Teste)',
+          usuarioId: 'teste123', // ID de teste
         ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _estaCarregando = false;
-        });
-      }
-    }
+      ),
+    );
   }
 
   @override
