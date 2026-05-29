@@ -2,93 +2,93 @@
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
-![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)
 
-O **EcoColeta** é uma aplicação mobile focada em zeladoria urbana e gestão ambiental. O objetivo do sistema é conectar cidadãos e empresas ao serviço de coleta de descartes específicos (eletrônicos, recicláveis, etc.), facilitando a logística e promovendo o descarte consciente.
+O **EcoColeta** é uma aplicação mobile focada em zeladoria urbana e gestão ambiental. O objetivo do sistema é conectar cidadãos e empresas ao serviço de coleta de descartes específicos (eletrônicos, recicláveis, entulhos, etc.), facilitando a logística e promovendo o descarte consciente.
 
-## 🚀 Funcionalidades
+Recentemente, o projeto passou por um **grande Refactoring de Arquitetura**, migrando de uma estrutura legada (PHP + MySQL) para uma stack moderna orientada a microsserviços na nuvem, utilizando **Node.js** e banco de dados NoSQL **Firebase Firestore**.
 
-- **Autenticação de Usuário:** Tela de login responsiva.
+---
+
+## 🚀 Funcionalidades Principais
+
+- **Autenticação de Usuário:** Sistema de login seguro.
 - **Cadastro Completo:** Registro de pessoas físicas e jurídicas (Nome/Razão Social, CPF/CNPJ, Endereço, Telefone, E-mail).
-- **Solicitação de Coleta:** Formulário dinâmico para registrar o tipo de material a ser descartado e o endereço de coleta.
-- **Integração REST:** Comunicação em tempo real com API própria construída em PHP.
+- **Gestão de Coletas (CRUD):** 
+  - Solicitação de novas coletas com descrição de volume, tipo de resíduo e foto.
+  - Listagem de histórico e coletas pendentes em tempo real.
+  - Edição e cancelamento de solicitações de coleta.
+- **Gestão de Perfil:** Visualização e atualização de dados do usuário.
 
-## 🏗️ Arquitetura e Tecnologias
+---
 
-O projeto adota uma arquitetura client-server (Mobile + API), garantindo desacoplamento entre a interface do usuário e as regras de negócio.
+## 🏗️ Arquitetura e Tecnologias (Atualizado)
 
-* **Frontend (Mobile):** Desenvolvido em **Flutter** (Dart), utilizando o padrão `StatefulWidget`/`StatelessWidget` para gerência de estado local e navegação via `Navigator`.
-* **Backend (API):** Scripts em **PHP** puro processando requisições HTTP (POST) e retornando status codes adequados.
-* **Banco de Dados:** **MySQL** relacional gerenciando as entidades de `usuarios` e `coletas`.
-* **Comunicação:** Pacote `http` do Flutter consumindo endpoints da API.
+O projeto adota uma arquitetura Client-Server na nuvem, garantindo escalabilidade, segurança e alta disponibilidade em conexões móveis (4G/Wi-Fi).
 
-## 📂 Estrutura de Diretórios (Frontend)
+* **Frontend (Mobile):** Desenvolvido em **Flutter** (Dart). Utiliza o pacote `http` para comunicação RESTful padrão (GET, POST, PUT, DELETE) com abstração de rotas no módulo Core.
+* **Backend (API REST):** Desenvolvida em **Node.js** utilizando o framework **Express**. A API centraliza as regras de negócio e a validação das rotas de usuários e coletas.
+* **Banco de Dados:** **Firebase Firestore** (NoSQL). A API se comunica nativamente com o banco utilizando o *Firebase Admin SDK*.
+* **Cloud Hosting:** A API Node.js está conteinerizada e hospedada na nuvem pelo serviço **Render**, garantindo que o aplicativo mobile funcione perfeitamente de qualquer rede.
+
+---
+
+## 📂 Estrutura do App (Frontend)
 
 ```text
 lib/
+ ┣ core/
+ ┃ ┗ api_constants.dart       # Abstração da URL Base (Cloud) e endpoints REST
  ┣ screens/
- ┃ ┣ tela_cadastro.dart     # Formulário de registro de novos usuários
- ┃ ┣ tela_formulario.dart   # Formulário de solicitação de coletas
- ┃ ┣ tela_inicial.dart      # Dashboard / Tela principal pós-login
- ┃ ┗ tela_login.dart        # Autenticação e entrada
- ┗ main.dart                # Ponto de entrada da aplicação (MaterialApp)
+ ┃ ┣ tela_cadastro.dart       # Formulário de registro de novos usuários
+ ┃ ┣ tela_formulario.dart     # Cadastro e solicitação de novas coletas
+ ┃ ┣ tela_inicial.dart        # Dashboard principal e listagem de histórico (CRUD)
+ ┃ ┣ tela_login.dart          # Autenticação e entrada no sistema
+ ┃ ┗ tela_perfil.dart         # Edição de perfil do usuário
+ ┗ main.dart                  # Ponto de entrada da aplicação (MaterialApp)
+```
 
-⚙️ Como Executar o Projeto Localmente
-Para rodar este projeto na sua máquina, você precisará do Flutter SDK e do XAMPP (ou servidor web equivalente com PHP e MySQL).
+---
 
-1. Configurando o Backend (Banco de Dados e API)
-Inicie o Apache e o MySQL no XAMPP Control Panel.
+## ⚙️ Como Executar o Projeto
 
-Acesse o phpMyAdmin (http://localhost/phpmyadmin) e crie um banco de dados chamado ecocoleta.
+Graças à nova infraestrutura na nuvem, rodar o projeto localmente se tornou extremamente simples, não sendo mais necessário configurar servidores Apache (XAMPP) ou bancos de dados na sua máquina.
 
-Execute as seguintes queries SQL para criar as tabelas necessárias:
-CREATE TABLE usuarios (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    cpf_cnpj VARCHAR(20) NOT NULL,
-    endereco VARCHAR(255) NOT NULL,
-    telefone VARCHAR(20) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    senha VARCHAR(255) NOT NULL,
-    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+### Pré-requisitos
+- [Flutter SDK](https://flutter.dev/docs/get-started/install)
+- Emulador Android/iOS ou um Smartphone físico.
 
-CREATE TABLE coletas (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    descricao_item VARCHAR(255) NOT NULL,
-    endereco VARCHAR(255) NOT NULL,
-    url_foto VARCHAR(255),
-    status ENUM('Pendente', 'Agendada', 'Concluida') DEFAULT 'Pendente',
-    data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+### Passo a Passo
 
-Copie os arquivos PHP da API (conexao.php, cadastrar_usuario.php, cadastrar_coleta.php) para a pasta htdocs/ecocoleta do seu XAMPP.
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/rafaellourenco10/ecocoleta_app.git
+   cd ecocoleta_app
+   ```
 
-2. Configurando o Frontend (Flutter)
-Clone o repositório:
+2. **Baixe as dependências do Flutter:**
+   ```bash
+   flutter pub get
+   ```
 
-git clone [https://github.com/SEU_USUARIO/ecocoleta-app.git](https://github.com/SEU_USUARIO/ecocoleta-app.git)
+3. **Verifique as variáveis de conexão:**
+   Abra o arquivo `lib/core/api_constants.dart` e garanta que a constante `baseUrl` esteja apontando para a sua API no Render (Ex: `https://ecocoleta-api-imd4.onrender.com/api`).
 
-Acesse a pasta do projeto e baixe as dependências:
-cd ecocoleta-app
-flutter pub get
+4. **Execute o Aplicativo:**
+   Conecte seu celular físico ou abra seu emulador e digite:
+   ```bash
+   flutter run
+   ```
 
-3. Variáveis de Ambiente (Atenção!)
-Como o emulador/celular físico não reconhece localhost como sendo o seu computador, é necessário apontar o IP da sua máquina local nos arquivos do Flutter.
+> **Nota para Desenvolvedores Backend:** 
+> Se desejar rodar a API Node.js localmente, mude a URL base no Flutter para `http://<seu-ip-local>:3000/api` e inicie o servidor com `node src/index.js` na pasta da API, contendo seu arquivo `.env` com as credenciais do Firebase.
 
-Abra os arquivos abaixo e substitua o IP 192.168.X.X pelo IP local da sua rede (IPv4):
+---
 
-lib/screens/tela_cadastro.dart
+## 👨‍💻 Autor
 
-lib/screens/tela_formulario.dart
+**Rafael R. Lourenço**
 
-4. Rodando o App
-Conecte seu dispositivo físico via Depuração USB ou inicie um emulador e execute:
-flutter run
-
-👨‍💻 Autor
-Rafael R. Lourenço
-
-Desenvolvido como projeto Full Stack de zeladoria urbana.
+Desenvolvido como um ecossistema completo (Full Stack) de zeladoria urbana, com foco em arquiteturas escaláveis na nuvem.
