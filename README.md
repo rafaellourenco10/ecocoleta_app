@@ -87,8 +87,11 @@ Graças à nova infraestrutura na nuvem, rodar o projeto localmente se tornou ex
 
 ---
 
-## 👨‍💻 Autor
+## 👨‍💻 Equipe
 
-**Rafael R. Lourenço**
+- **Rafael R. Lourenço**
+- **Guilherme**
+- **Geovanni**
+- **João Wilson**
 
 Desenvolvido como um ecossistema completo (Full Stack) de zeladoria urbana, com foco em arquiteturas escaláveis na nuvem.
