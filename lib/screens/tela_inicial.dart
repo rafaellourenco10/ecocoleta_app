@@ -116,7 +116,7 @@ class _TelaInicialState extends State<TelaInicial> {
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const TelaFormulario(),
+                          builder: (context) => TelaFormulario(usuarioId: widget.usuarioId),
                         ),
                       );
                       _contarPendentes();

@@ -6,7 +6,8 @@ import 'dart:convert';
 import '../core/api_constants.dart';
 
 class TelaFormulario extends StatefulWidget {
-  const TelaFormulario({super.key});
+  final String usuarioId;
+  const TelaFormulario({super.key, required this.usuarioId});
 
   @override
   State<TelaFormulario> createState() => _TelaFormularioState();
@@ -94,7 +95,7 @@ class _TelaFormularioState extends State<TelaFormulario> {
         url,
         headers: headers,
         body: jsonEncode({
-          'usuario_id': '1', // Temporário: ID fixo para teste
+          'usuario_id': widget.usuarioId,
           'tipo_residuo': _tipoResiduo,
           'volume': _volume,
           'acondicionamento': _acondicionamento,
@@ -115,10 +116,16 @@ class _TelaFormularioState extends State<TelaFormulario> {
         Navigator.pop(context); // Volta para a tela inicial
       } else {
         if (!mounted) return;
-        var erro = json.decode(resposta.body);
+        String mensagemErro;
+        try {
+          var erro = json.decode(resposta.body);
+          mensagemErro = erro['error'] ?? 'Erro ${resposta.statusCode}';
+        } catch (_) {
+          mensagemErro = 'Erro no servidor: ${resposta.statusCode}';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro no servidor: ${erro['error'] ?? resposta.statusCode}'),
+            content: Text(mensagemErro),
             backgroundColor: Colors.red,
           ),
         );
@@ -127,7 +134,7 @@ class _TelaFormularioState extends State<TelaFormulario> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erro de conexão. Verifique o servidor XAMPP.'),
+          content: Text('Erro de conexão. Verifique sua internet e tente novamente.'),
           backgroundColor: Colors.red,
         ),
       );
