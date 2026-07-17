@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../core/api_constants.dart';
+import '../core/api_exception.dart';
+import '../core/usuario_service.dart';
+import '../core/validators.dart';
 class TelaCadastro extends StatefulWidget {
   const TelaCadastro({super.key});
 
@@ -10,6 +10,8 @@ class TelaCadastro extends StatefulWidget {
 }
 
 class _TelaCadastroState extends State<TelaCadastro> {
+  final _formKey = GlobalKey<FormState>();
+
   // Controladores para capturar os dados digitados
   final _nomeController = TextEditingController();
   final _cpfCnpjController = TextEditingController();
@@ -21,168 +23,151 @@ class _TelaCadastroState extends State<TelaCadastro> {
   bool _estaCarregando = false; // Variável para controlar a animação do botão
 
   Future<void> enviarCadastro() async {
+    if (!_formKey.currentState!.validate()) return;
+
     setState(() {
       _estaCarregando = true;
     });
 
-    var url = Uri.parse(ApiConstants.registrarUsuario);
-    
-    var headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    };
-
     try {
-      var resposta = await http.post(
-        url,
-        headers: headers,
-        body: jsonEncode({
-          'nome': _nomeController.text,
-          'cpf_cnpj': _cpfCnpjController.text,
-          'endereco': _enderecoController.text,
-          'telefone': _telefoneController.text,
-          'email': _emailController.text,
-          'senha': _senhaController.text,
-        }),
+      await UsuarioService.registrar(
+        nome: _nomeController.text,
+        cpfCnpj: _cpfCnpjController.text,
+        endereco: _enderecoController.text,
+        telefone: _telefoneController.text,
+        email: _emailController.text,
+        senha: _senhaController.text,
       );
 
-      if (resposta.statusCode == 201) {
-        // Mostra aviso de sucesso e volta para a tela de Login
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Conta criada com sucesso!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pop(context);
-      } else {
-        var dados = json.decode(resposta.body);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(dados['error'] ?? 'Erro no servidor: ${resposta.statusCode}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
+      if (!mounted) return;
+      // Mostra aviso de sucesso e volta para a tela de Login
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erro de conexão. Verifique se a API está rodando.'),
-          backgroundColor: Colors.red,
+          content: Text('Conta criada com sucesso!'),
+          backgroundColor: Colors.green,
         ),
       );
+      Navigator.pop(context);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message), backgroundColor: Colors.red),
+      );
     } finally {
-      setState(() {
-        _estaCarregando = false;
-      });
+      if (mounted) {
+        setState(() {
+          _estaCarregando = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Criar Conta', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.green[700],
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      appBar: AppBar(title: const Text('Criar Conta')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Complete seus dados',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 25),
-
-            TextField(
-              controller: _nomeController,
-              decoration: const InputDecoration(
-                labelText: 'Nome Completo ou Razão Social',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person),
+        child: Form(
+          key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Complete seus dados',
+                style: textTheme.headlineSmall,
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 15),
-
-            TextField(
-              controller: _cpfCnpjController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'CPF ou CNPJ',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.badge),
+              const SizedBox(height: 4),
+              Text(
+                'Leva menos de um minuto',
+                style: textTheme.bodyMedium,
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 15),
+              const SizedBox(height: 28),
 
-            TextField(
-              controller: _enderecoController,
-              decoration: const InputDecoration(
-                labelText: 'Endereço Completo',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.location_on),
+              TextFormField(
+                controller: _nomeController,
+                decoration: const InputDecoration(
+                  labelText: 'Nome Completo ou Razão Social',
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+                validator: (v) => Validators.obrigatorio(v, campo: 'Nome'),
               ),
-            ),
-            const SizedBox(height: 15),
+              const SizedBox(height: 16),
 
-            TextField(
-              controller: _telefoneController,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'Telefone / WhatsApp',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.phone),
+              TextFormField(
+                controller: _cpfCnpjController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'CPF ou CNPJ',
+                  prefixIcon: Icon(Icons.badge_outlined),
+                ),
+                validator: Validators.cpfCnpj,
               ),
-            ),
-            const SizedBox(height: 15),
+              const SizedBox(height: 16),
 
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'E-mail',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.email),
+              TextFormField(
+                controller: _enderecoController,
+                decoration: const InputDecoration(
+                  labelText: 'Endereço Completo',
+                  prefixIcon: Icon(Icons.location_on_outlined),
+                ),
+                validator: (v) => Validators.obrigatorio(v, campo: 'Endereço'),
               ),
-            ),
-            const SizedBox(height: 15),
+              const SizedBox(height: 16),
 
-            TextField(
-              controller: _senhaController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Senha',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock),
+              TextFormField(
+                controller: _telefoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Telefone / WhatsApp',
+                  prefixIcon: Icon(Icons.phone_outlined),
+                ),
+                validator: Validators.telefone,
               ),
-            ),
-            const SizedBox(height: 30),
+              const SizedBox(height: 16),
 
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green[700],
-                padding: const EdgeInsets.symmetric(vertical: 16),
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'E-mail',
+                  prefixIcon: Icon(Icons.email_outlined),
+                ),
+                validator: Validators.email,
               ),
-              onPressed: _estaCarregando ? null : enviarCadastro,
-              child: _estaCarregando
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
-                      ),
-                    )
-                  : const Text(
-                      'Finalizar Cadastro',
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    ),
-            ),
-          ],
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _senhaController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Senha',
+                  prefixIcon: Icon(Icons.lock_outline),
+                ),
+                validator: Validators.senha,
+              ),
+              const SizedBox(height: 30),
+
+              ElevatedButton(
+                onPressed: _estaCarregando ? null : enviarCadastro,
+                child: _estaCarregando
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('Finalizar Cadastro'),
+              ),
+            ],
+          ),
         ),
       ),
     );

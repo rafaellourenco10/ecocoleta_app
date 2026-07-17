@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'core/app_theme.dart';
 import 'screens/tela_login.dart';
 
 void main() {
@@ -13,10 +14,7 @@ class EcoColetaApp extends StatelessWidget {
     return MaterialApp(
       title: 'EcoColeta',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light,
       home: const TelaLogin(),
     );
   }

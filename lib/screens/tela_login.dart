@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../core/api_constants.dart';
+import '../core/app_theme.dart';
 import 'tela_inicial.dart';
 import 'tela_cadastro.dart';
 
@@ -33,79 +31,116 @@ class _TelaLoginState extends State<TelaLogin> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
+      body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.recycling, size: 100, color: Colors.green),
-              const SizedBox(height: 20),
-              Text(
-                'EcoColeta',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green[800],
-                ),
-              ),
-              const SizedBox(height: 40),
-
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'E-mail',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
-                ),
-              ),
-              const SizedBox(height: 15),
-
-              TextField(
-                controller: _senhaController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Senha',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
-                ),
-              ),
-              const SizedBox(height: 25),
-
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green[700],
-                  minimumSize: const Size(double.infinity, 55),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 56, horizontal: 24),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.primaryDark, AppColors.primary],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
                   ),
                 ),
-                onPressed: _estaCarregando ? null : realizarLogin,
-                child: _estaCarregando
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text(
-                        'Entrar',
-                        style: TextStyle(color: Colors.white, fontSize: 18),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
                       ),
-              ),
-
-              const SizedBox(height: 20),
-
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TelaCadastro(),
+                      child: const Icon(
+                        Icons.recycling_rounded,
+                        size: 56,
+                        color: Colors.white,
+                      ),
                     ),
-                  );
-                },
-                child: const Text(
-                  'Ainda não tem uma conta? Cadastre-se',
-                  style: TextStyle(color: Colors.green, fontSize: 16),
+                    const SizedBox(height: 20),
+                    Text(
+                      'EcoColeta',
+                      style: textTheme.headlineMedium?.copyWith(color: Colors.white),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Descarte consciente, cidade mais limpa',
+                      textAlign: TextAlign.center,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 36, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text('Bem-vindo de volta', style: textTheme.titleLarge),
+                    const SizedBox(height: 4),
+                    Text('Entre para continuar', style: textTheme.bodyMedium),
+                    const SizedBox(height: 28),
+
+                    TextField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'E-mail',
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    TextField(
+                      controller: _senhaController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Senha',
+                        prefixIcon: Icon(Icons.lock_outline),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+
+                    ElevatedButton(
+                      onPressed: _estaCarregando ? null : realizarLogin,
+                      child: _estaCarregando
+                          ? const SizedBox(
+                              height: 22,
+                              width: 22,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.4,
+                              ),
+                            )
+                          : const Text('Entrar'),
+                    ),
+                    const SizedBox(height: 20),
+
+                    Center(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TelaCadastro(),
+                            ),
+                          );
+                        },
+                        child: const Text('Ainda não tem uma conta? Cadastre-se'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

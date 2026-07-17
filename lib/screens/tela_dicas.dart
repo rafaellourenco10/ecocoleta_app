@@ -1,19 +1,38 @@
 import 'package:flutter/material.dart';
+import '../core/app_theme.dart';
 
 class TelaDicas extends StatelessWidget {
   const TelaDicas({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dicas de Descarte', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.teal[600],
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+      appBar: AppBar(title: const Text('Dicas de Descarte')),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         children: [
+          Container(
+            padding: const EdgeInsets.all(18),
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: AppColors.secondarySoft,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.eco_rounded, color: AppColors.secondary, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Cada material tem um destino certo. Confira como descartar sem agredir o meio ambiente.',
+                    style: textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+                  ),
+                ),
+              ],
+            ),
+          ),
           _buildDicaCard(
             context,
             titulo: 'Eletrônicos',
@@ -56,23 +75,18 @@ class TelaDicas extends StatelessWidget {
 
   Widget _buildDicaCard(BuildContext context, {required String titulo, required IconData icone, required Color cor, required String descricao}) {
     return Card(
-      elevation: 3,
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      margin: const EdgeInsets.only(bottom: 14),
       clipBehavior: Clip.antiAlias,
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           leading: CircleAvatar(
-            backgroundColor: cor.withOpacity(0.2),
+            backgroundColor: cor.withValues(alpha: 0.15),
             child: Icon(icone, color: cor),
           ),
           title: Text(
             titulo,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           childrenPadding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
           children: [

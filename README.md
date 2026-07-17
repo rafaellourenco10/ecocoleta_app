@@ -73,17 +73,18 @@ Graças à nova infraestrutura na nuvem, rodar o projeto localmente se tornou ex
    flutter pub get
    ```
 
-3. **Verifique as variáveis de conexão:**
-   Abra o arquivo `lib/core/api_constants.dart` e garanta que a constante `baseUrl` esteja apontando para a sua API no Render (Ex: `https://ecocoleta-api-imd4.onrender.com/api`).
-
-4. **Execute o Aplicativo:**
-   Conecte seu celular físico ou abra seu emulador e digite:
+3. **Execute o Aplicativo:**
+   Por padrão, o app já aponta para a API em produção no Render. Conecte seu celular físico ou abra seu emulador e digite:
    ```bash
    flutter run
    ```
 
-> **Nota para Desenvolvedores Backend:** 
-> Se desejar rodar a API Node.js localmente, mude a URL base no Flutter para `http://<seu-ip-local>:3000/api` e inicie o servidor com `node src/index.js` na pasta da API, contendo seu arquivo `.env` com as credenciais do Firebase.
+> **Nota para Desenvolvedores Backend:**
+> Para rodar contra a API Node.js localmente, não é preciso editar nenhum arquivo: basta passar a URL local na hora de rodar, via `--dart-define`:
+> ```bash
+> flutter run --dart-define=API_BASE_URL=http://<seu-ip-local>:3000/api
+> ```
+> Inicie o servidor com `node src/index.js` na pasta da API, contendo seu arquivo `.env` com as credenciais do Firebase.
 
 ---
 
