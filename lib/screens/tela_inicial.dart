@@ -33,6 +33,7 @@ class _TelaInicialState extends State<TelaInicial> {
   Future<void> _contarPendentes() async {
     try {
       final dados = await ColetaService.listarPorUsuario(widget.usuarioId);
+      if (!mounted) return;
       setState(() {
         _quantidadePendentes = dados.length;
       });
@@ -273,6 +274,7 @@ class _ListaColetasWidget extends StatefulWidget {
 class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
   List _coletas = [];
   bool _carregando = true;
+  String? _erro;
 
   @override
   void initState() {
@@ -281,19 +283,47 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
   }
 
   Future<void> _buscar() async {
-    setState(() => _carregando = true);
+    setState(() {
+      _carregando = true;
+      _erro = null;
+    });
     try {
       final dados = await ColetaService.listarPorUsuario(widget.usuarioId);
+      if (!mounted) return;
       setState(() {
         _coletas = dados;
         _carregando = false;
       });
-    } catch (e) {
-      setState(() => _carregando = false);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _erro = e.message;
+        _carregando = false;
+      });
     }
   }
 
   Future<void> _deletar(String id) async {
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Excluir solicitação?'),
+        content: const Text('Essa ação não pode ser desfeita.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+    if (confirmar != true) return;
+
     try {
       await ColetaService.deletar(id);
     } on ApiException catch (e) {
@@ -335,21 +365,27 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
   }
 
   void _dialogoEdicao(Map coleta) {
-    final editaTipo = TextEditingController(text: coleta['tipo_residuo']);
+    String? editaTipo = tiposResiduo.contains(coleta['tipo_residuo'])
+        ? coleta['tipo_residuo']
+        : null;
     final editaDesc = TextEditingController(text: coleta['descricao_item']);
     final editaEnd = TextEditingController(text: coleta['endereco']);
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Editar Coleta'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: editaTipo,
+              DropdownButtonFormField<String>(
+                initialValue: editaTipo,
                 decoration: const InputDecoration(labelText: 'Tipo'),
+                items: tiposResiduo
+                    .map((t) => DropdownMenuItem(value: t, child: Text(t)))
+                    .toList(),
+                onChanged: (val) => editaTipo = val,
               ),
               const SizedBox(height: 12),
               TextField(
@@ -366,18 +402,29 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancelar'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(minimumSize: const Size(120, 44)),
             onPressed: () async {
+              if (editaTipo == null ||
+                  editaDesc.text.trim().isEmpty ||
+                  editaEnd.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Preencha todos os campos.'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
               try {
                 await ColetaService.editar(
                   coleta['id'].toString(),
-                  tipoResiduo: editaTipo.text,
-                  descricaoItem: editaDesc.text,
-                  endereco: editaEnd.text,
+                  tipoResiduo: editaTipo!,
+                  descricaoItem: editaDesc.text.trim(),
+                  endereco: editaEnd.text.trim(),
                 );
               } on ApiException catch (e) {
                 if (!mounted) return;
@@ -386,8 +433,8 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
                 );
                 return;
               }
-              if (!mounted) return;
-              Navigator.pop(context);
+              if (!dialogContext.mounted) return;
+              Navigator.pop(dialogContext);
               _buscar();
             },
             child: const Text('Salvar'),
@@ -422,6 +469,22 @@ class _ListaColetasWidgetState extends State<_ListaColetasWidget> {
         Expanded(
           child: _carregando
               ? const Center(child: CircularProgressIndicator())
+              : _erro != null
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.cloud_off_rounded, size: 48, color: Colors.grey.shade400),
+                        const SizedBox(height: 12),
+                        Text(_erro!, textAlign: TextAlign.center, style: textTheme.bodyMedium),
+                        const SizedBox(height: 12),
+                        TextButton(onPressed: _buscar, child: const Text('Tentar novamente')),
+                      ],
+                    ),
+                  ),
+                )
               : _coletas.isEmpty
               ? Center(
                   child: Column(

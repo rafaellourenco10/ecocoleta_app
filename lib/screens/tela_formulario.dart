@@ -7,6 +7,14 @@ import '../core/app_theme.dart';
 import '../core/coleta_service.dart';
 import '../core/validators.dart';
 
+const tiposResiduo = [
+  'Orgânico',
+  'Reciclável',
+  'Construção Civil',
+  'Infectante',
+  'Eletrônico',
+];
+
 class TelaFormulario extends StatefulWidget {
   final String usuarioId;
   const TelaFormulario({super.key, required this.usuarioId});
@@ -29,13 +37,6 @@ class _TelaFormularioState extends State<TelaFormulario> {
   File? _imagemSelecionada;
 
   // Listas de opções
-  final List<String> _tipos = [
-    'Orgânico',
-    'Reciclável',
-    'Construção Civil',
-    'Infectante',
-    'Eletrônico',
-  ];
   final List<String> _volumes = [
     'Até 0,5m³',
     'Entre 0,5m³ e 1m³',
@@ -55,9 +56,9 @@ class _TelaFormularioState extends State<TelaFormulario> {
     final picker = ImagePicker();
     final foto = await picker.pickImage(
       source: ImageSource.camera,
-      imageQuality: 50, // Reduz qualidade para não pesar no envio
-      maxWidth: 1024,
-      maxHeight: 1024,
+      imageQuality: 40, // Reduz qualidade para não pesar no envio
+      maxWidth: 800,
+      maxHeight: 800,
     );
 
     if (foto != null) {
@@ -178,8 +179,8 @@ class _TelaFormularioState extends State<TelaFormulario> {
                   labelText: 'Tipo de Resíduo',
                   prefixIcon: Icon(Icons.category_outlined),
                 ),
-                value: _tipoResiduo,
-                items: _tipos
+                initialValue: _tipoResiduo,
+                items: tiposResiduo
                     .map((t) => DropdownMenuItem(value: t, child: Text(t)))
                     .toList(),
                 onChanged: (val) => setState(() => _tipoResiduo = val),
@@ -193,7 +194,7 @@ class _TelaFormularioState extends State<TelaFormulario> {
                   labelText: 'Volume Estimado',
                   prefixIcon: Icon(Icons.assessment_outlined),
                 ),
-                value: _volume,
+                initialValue: _volume,
                 items: _volumes
                     .map((v) => DropdownMenuItem(value: v, child: Text(v)))
                     .toList(),
@@ -208,7 +209,7 @@ class _TelaFormularioState extends State<TelaFormulario> {
                   labelText: 'Acondicionamento',
                   prefixIcon: Icon(Icons.inventory_2_outlined),
                 ),
-                value: _acondicionamento,
+                initialValue: _acondicionamento,
                 items: _formasAcondicionamento
                     .map((a) => DropdownMenuItem(value: a, child: Text(a)))
                     .toList(),

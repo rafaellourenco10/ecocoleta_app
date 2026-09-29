@@ -30,12 +30,36 @@ class UsuarioService {
         }),
       );
     } catch (_) {
-      throw const ApiException('Erro de conexão. Verifique se a API está rodando.');
+      throw const ApiException('Erro de conexão. Verifique sua internet e tente novamente.');
     }
 
     if (resposta.statusCode != 201) {
       throw ApiException(mensagemErroDe(resposta));
     }
+  }
+
+  static Future<Map<String, dynamic>> login({
+    required String email,
+    required String senha,
+  }) async {
+    http.Response resposta;
+    try {
+      resposta = await http
+          .post(
+            Uri.parse(ApiConstants.loginUsuario),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'email': email, 'senha': senha}),
+          )
+          // O servidor gratuito do Render pode levar ~50s para acordar.
+          .timeout(const Duration(seconds: 70));
+    } catch (_) {
+      throw const ApiException('Erro de conexão. Verifique sua internet e tente novamente.');
+    }
+
+    if (resposta.statusCode != 200) {
+      throw ApiException(mensagemErroDe(resposta));
+    }
+    return json.decode(resposta.body) as Map<String, dynamic>;
   }
 
   static Future<Map<String, dynamic>> obterPerfil(String usuarioId) async {

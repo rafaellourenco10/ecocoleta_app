@@ -31,6 +31,7 @@ class _TelaPerfilState extends State<TelaPerfil> {
   Future<void> _buscarDadosPerfil() async {
     try {
       final dados = await UsuarioService.obterPerfil(widget.usuarioId);
+      if (!mounted) return;
       setState(() {
         _nomeController.text = dados['nome'] ?? '';
         _emailController.text = dados['email'] ?? '';
@@ -38,9 +39,12 @@ class _TelaPerfilState extends State<TelaPerfil> {
         _enderecoController.text = dados['endereco'] ?? '';
         _carregando = false;
       });
-    } catch (e) {
-      debugPrint("Erro ao carregar perfil: $e");
+    } on ApiException catch (e) {
+      if (!mounted) return;
       setState(() => _carregando = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.message), backgroundColor: Colors.red),
+      );
     }
   }
 
