@@ -9,12 +9,11 @@
 <meta property="og:description" content="Peça a coleta de eletrônicos, entulho e recicláveis pelo celular.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#15803d">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♻️</text></svg>">
+<link rel="icon" type="image/png" href="img/icone.png">
+<link rel="apple-touch-icon" href="img/icone.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
 <style>
 :root {
   --bg: #f5f7f6;
@@ -25,6 +24,8 @@
   --line: #dfe7e2;
   --accent: #15803d;
   --accent-hover: #0f6b37;
+  --fill: #15803d;
+  --fill-hover: #0f6b37;
   --band: #0f3d24;
   --shadow: 0 24px 60px -24px rgb(15 61 36 / .35);
   --r-card: 20px;
@@ -38,8 +39,10 @@
     --text: #e6eee9;
     --muted: #9aa8a0;
     --line: #25332b;
-    --accent: #22a355;
-    --accent-hover: #2dbb64;
+    --accent: #3ecf75;
+    --accent-hover: #5ad98a;
+    --fill: #15803d;
+    --fill-hover: #188f45;
     --band: #0b2918;
     --shadow: 0 24px 60px -24px rgb(0 0 0 / .6);
   }
@@ -60,6 +63,8 @@ h3 { font-size: 1.15rem; }
 p { margin: 0; }
 a { color: inherit; }
 img { display: block; max-width: 100%; }
+i { display: inline-flex; font-style: normal; }
+i svg { width: 1em; height: 1em; fill: currentColor; }
 .wrap { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
 section { padding: 96px 0; }
 
@@ -72,8 +77,8 @@ section { padding: 96px 0; }
 }
 .btn:active { transform: scale(.97); }
 .btn i { font-size: 1.3em; }
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary { background: var(--fill); color: #fff; }
+.btn-primary:hover { background: var(--fill-hover); }
 .btn-ghost { color: var(--text); box-shadow: inset 0 0 0 1.5px var(--line); }
 .btn-ghost:hover { box-shadow: inset 0 0 0 1.5px var(--accent); }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
@@ -89,7 +94,7 @@ nav { display: flex; align-items: center; gap: 32px; height: 68px; }
 .logo { display: flex; align-items: center; gap: 10px; font: 700 1.2rem Poppins, sans-serif; text-decoration: none; }
 .logo span {
   display: grid; place-items: center; width: 36px; height: 36px;
-  border-radius: 10px; background: var(--accent); color: #fff; font-size: 1.25rem;
+  border-radius: 10px; background: var(--fill); color: #fff; font-size: 1.25rem;
 }
 nav ul { display: flex; gap: 28px; list-style: none; margin: 0 0 0 auto; padding: 0; }
 nav ul a { text-decoration: none; color: var(--muted); font-weight: 500; }
@@ -142,7 +147,7 @@ nav .btn { padding: 10px 18px; font-size: .95rem; }
 }
 .tile > i { font-size: 2rem; color: var(--accent); margin-bottom: 8px; }
 .tile p { color: var(--muted); }
-.tile.big { grid-column: span 2; background: var(--accent); border-color: transparent; color: #fff; justify-content: flex-end; min-height: 240px; }
+.tile.big { grid-column: span 2; background: var(--fill); border-color: transparent; color: #fff; justify-content: flex-end; min-height: 240px; }
 .tile.big > i, .tile.big p { color: #fff; }
 .tile.big > i { font-size: 2.6rem; }
 .tile.dots {
@@ -193,7 +198,7 @@ details p { padding: 0 24px 22px 62px; color: var(--muted); }
 
 footer { padding: 48px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: .95rem; }
 footer .wrap { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: center; justify-content: space-between; }
-footer a { color: var(--text); font-weight: 500; }
+footer a { color: var(--text); font-weight: 500; padding: 10px 0; }
 
 /* Movimento */
 @media (prefers-reduced-motion: no-preference) {
@@ -220,21 +225,29 @@ footer a { color: var(--text); font-weight: 500; }
   .tile.big { grid-column: auto; min-height: 200px; }
   details p { padding-left: 24px; }
 }
+@media (max-width: 480px) {
+  .cta-row .btn { flex: 1 1 auto; justify-content: center; }
+}
+@media (min-width: 560px) and (max-width: 860px) {
+  .bento { grid-template-columns: 1fr 1fr; }
+  .tile.big { grid-column: span 2; }
+}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-android-logo" viewBox="0 0 256 256"><path d="M176,148a12,12,0,1,1-12-12A12,12,0,0,1,176,148ZM92,136a12,12,0,1,0,12,12A12,12,0,0,0,92,136Zm148,24v24a16,16,0,0,1-16,16H32a16,16,0,0,1-16-16V161.13A113.38,113.38,0,0,1,51.4,78.72L26.34,53.66A8,8,0,0,1,37.66,42.34L63.82,68.5a111.43,111.43,0,0,1,128.55-.19l26-26a8,8,0,0,1,11.32,11.32L204.82,78.5c.75.71,1.5,1.43,2.24,2.17A111.25,111.25,0,0,1,240,160Zm-16,0a96,96,0,0,0-96-96h-.34C74.91,64.18,32,107.75,32,161.13V184H224Z"/></symbol><symbol id="i-barricade" viewBox="0 0 256 256"><path d="M224,64H32A16,16,0,0,0,16,80v72a16,16,0,0,0,16,16H56v32a8,8,0,0,0,16,0V168H184v32a8,8,0,0,0,16,0V168h24a16,16,0,0,0,16-16V80A16,16,0,0,0,224,64Zm0,64.69L175.31,80H224ZM80.69,80l72,72H103.31L32,80.69V80ZM32,103.31,80.69,152H32ZM224,152H175.31l-72-72h49.38L224,151.32V152Z"/></symbol><symbol id="i-battery-warning" viewBox="0 0 256 256"><path d="M256,96v64a8,8,0,0,1-16,0V96a8,8,0,0,1,16,0ZM224,80v96a24,24,0,0,1-24,24H32A24,24,0,0,1,8,176V80A24,24,0,0,1,32,56H200A24,24,0,0,1,224,80Zm-16,0a8,8,0,0,0-8-8H32a8,8,0,0,0-8,8v96a8,8,0,0,0,8,8H200a8,8,0,0,0,8-8Zm-92,52a8,8,0,0,0,8-8V96a8,8,0,0,0-16,0v28A8,8,0,0,0,116,132Zm0,12a12,12,0,1,0,12,12A12,12,0,0,0,116,144Z"/></symbol><symbol id="i-camera" viewBox="0 0 256 256"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"/></symbol><symbol id="i-caret-down" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"/></symbol><symbol id="i-desktop" viewBox="0 0 256 256"><path d="M208,40H48A24,24,0,0,0,24,64V176a24,24,0,0,0,24,24h72v16H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V200h72a24,24,0,0,0,24-24V64A24,24,0,0,0,208,40ZM48,56H208a8,8,0,0,1,8,8v80H40V64A8,8,0,0,1,48,56ZM208,184H48a8,8,0,0,1-8-8V160H216v16A8,8,0,0,1,208,184Z"/></symbol><symbol id="i-device-mobile" viewBox="0 0 256 256"><path d="M176,16H80A24,24,0,0,0,56,40V216a24,24,0,0,0,24,24h96a24,24,0,0,0,24-24V40A24,24,0,0,0,176,16ZM72,64H184V192H72Zm8-32h96a8,8,0,0,1,8,8v8H72V40A8,8,0,0,1,80,32Zm96,192H80a8,8,0,0,1-8-8v-8H184v8A8,8,0,0,1,176,224Z"/></symbol><symbol id="i-download-simple" viewBox="0 0 256 256"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,124.69V32a8,8,0,0,0-16,0v92.69L93.66,98.34a8,8,0,0,0-11.32,11.32Z"/></symbol><symbol id="i-drop" viewBox="0 0 256 256"><path d="M174,47.75a254.19,254.19,0,0,0-41.45-38.3,8,8,0,0,0-9.18,0A254.19,254.19,0,0,0,82,47.75C54.51,79.32,40,112.6,40,144a88,88,0,0,0,176,0C216,112.6,201.49,79.32,174,47.75ZM128,216a72.08,72.08,0,0,1-72-72c0-57.23,55.47-105,72-118,16.53,13,72,60.75,72,118A72.08,72.08,0,0,1,128,216Zm55.89-62.66a57.6,57.6,0,0,1-46.56,46.55A8.75,8.75,0,0,1,136,200a8,8,0,0,1-1.32-15.89c16.57-2.79,30.63-16.85,33.44-33.45a8,8,0,0,1,15.78,2.68Z"/></symbol><symbol id="i-first-aid-kit" viewBox="0 0 256 256"><path d="M216,56H176V48a24,24,0,0,0-24-24H104A24,24,0,0,0,80,48v8H40A16,16,0,0,0,24,72V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V72A16,16,0,0,0,216,56ZM96,48a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96ZM216,200H40V72H216V200Zm-56-64a8,8,0,0,1-8,8H136v16a8,8,0,0,1-16,0V144H104a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,160,136Z"/></symbol><symbol id="i-leaf" viewBox="0 0 256 256"><path d="M223.45,40.07a8,8,0,0,0-7.52-7.52C139.8,28.08,78.82,51,52.82,94a87.09,87.09,0,0,0-12.76,49c.57,15.92,5.21,32,13.79,47.85l-19.51,19.5a8,8,0,0,0,11.32,11.32l19.5-19.51C81,210.73,97.09,215.37,113,215.94q1.67.06,3.33.06A86.93,86.93,0,0,0,162,203.18C205,177.18,227.93,116.21,223.45,40.07ZM153.75,189.5c-22.75,13.78-49.68,14-76.71.77l88.63-88.62a8,8,0,0,0-11.32-11.32L65.73,179c-13.19-27-13-54,.77-76.71,22.09-36.47,74.6-56.44,141.31-54.06C210.2,114.89,190.22,167.41,153.75,189.5Z"/></symbol><symbol id="i-list-checks" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H128a8,8,0,0,1,0-16h88A8,8,0,0,1,224,128ZM128,72h88a8,8,0,0,0,0-16H128a8,8,0,0,0,0,16Zm88,112H128a8,8,0,0,0,0,16h88a8,8,0,0,0,0-16ZM82.34,42.34,56,68.69,45.66,58.34A8,8,0,0,0,34.34,69.66l16,16a8,8,0,0,0,11.32,0l32-32A8,8,0,0,0,82.34,42.34Zm0,64L56,132.69,45.66,122.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32,0l32-32a8,8,0,0,0-11.32-11.32Zm0,64L56,196.69,45.66,186.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32,0l32-32a8,8,0,0,0-11.32-11.32Z"/></symbol><symbol id="i-pill" viewBox="0 0 256 256"><path d="M216.42,39.6a53.26,53.26,0,0,0-75.32,0L39.6,141.09a53.26,53.26,0,0,0,75.32,75.31h0L216.43,114.91A53.31,53.31,0,0,0,216.42,39.6ZM103.61,205.09h0a37.26,37.26,0,0,1-52.7-52.69L96,107.31,148.7,160ZM205.11,103.6,160,148.69,107.32,96l45.1-45.09a37.26,37.26,0,0,1,52.69,52.69ZM189.68,82.34a8,8,0,0,1,0,11.32l-24,24a8,8,0,1,1-11.31-11.32l24-24A8,8,0,0,1,189.68,82.34Z"/></symbol><symbol id="i-recycle" viewBox="0 0 256 256"><path d="M96,208a8,8,0,0,1-8,8H40a24,24,0,0,1-20.77-36l34.29-59.25L39.47,124.5A8,8,0,1,1,35.33,109l32.77-8.77a8,8,0,0,1,9.8,5.66l8.79,32.77A8,8,0,0,1,81,148.5a8.37,8.37,0,0,1-2.08.27,8,8,0,0,1-7.72-5.93l-3.8-14.15L33.11,188A8,8,0,0,0,40,200H88A8,8,0,0,1,96,208Zm140.73-28-23.14-40a8,8,0,0,0-13.84,8l23.14,40A8,8,0,0,1,216,200H147.31l10.34-10.34a8,8,0,0,0-11.31-11.32l-24,24a8,8,0,0,0,0,11.32l24,24a8,8,0,0,0,11.31-11.32L147.31,216H216a24,24,0,0,0,20.77-36ZM128,32a7.85,7.85,0,0,1,6.92,4l34.29,59.25-14.08-3.78A8,8,0,0,0,151,106.92l32.78,8.79a8.23,8.23,0,0,0,2.07.27,8,8,0,0,0,7.72-5.93l8.79-32.79a8,8,0,1,0-15.45-4.14l-3.8,14.17L148.77,28a24,24,0,0,0-41.54,0L84.07,68a8,8,0,0,0,13.85,8l23.16-40A7.85,7.85,0,0,1,128,32Z"/></symbol><symbol id="i-shield-check" viewBox="0 0 256 256"><path d="M208,40H48A16,16,0,0,0,32,56v56c0,52.72,25.52,84.67,46.93,102.19,23.06,18.86,46,25.26,47,25.53a8,8,0,0,0,4.2,0c1-.27,23.91-6.67,47-25.53C198.48,196.67,224,164.72,224,112V56A16,16,0,0,0,208,40Zm0,72c0,37.07-13.66,67.16-40.6,89.42A129.3,129.3,0,0,1,128,223.62a128.25,128.25,0,0,1-38.92-21.81C61.82,179.51,48,149.3,48,112l0-56,160,0ZM82.34,141.66a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32l-56,56a8,8,0,0,1-11.32,0Z"/></symbol><symbol id="i-user-circle-plus" viewBox="0 0 256 256"><path d="M168,56a8,8,0,0,1,8-8h16V32a8,8,0,0,1,16,0V48h16a8,8,0,0,1,0,16H208V80a8,8,0,0,1-16,0V64H176A8,8,0,0,1,168,56Zm62.56,54.68a103.92,103.92,0,1,1-85.24-85.24,8,8,0,0,1-2.64,15.78A88.07,88.07,0,0,0,40,128a87.62,87.62,0,0,0,22.24,58.41A79.66,79.66,0,0,1,98.3,157.66a48,48,0,1,1,59.4,0,79.66,79.66,0,0,1,36.06,28.75A87.62,87.62,0,0,0,216,128a88.85,88.85,0,0,0-1.22-14.68,8,8,0,1,1,15.78-2.64ZM128,152a32,32,0,1,0-32-32A32,32,0,0,0,128,152Zm0,64a87.57,87.57,0,0,0,53.92-18.5,64,64,0,0,0-107.84,0A87.57,87.57,0,0,0,128,216Z"/></symbol><symbol id="i-warning" viewBox="0 0 256 256"><path d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,144V104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm20,36a12,12,0,1,1-12-12A12,12,0,0,1,140,180Z"/></symbol><symbol id="i-recycle-fill" viewBox="0 0 256 256"><path d="M96,208a8,8,0,0,1-8,8H40a24,24,0,0,1-20.77-36l28-48.3-13.82-8A8,8,0,0,1,35.33,109l32.77-8.77a8,8,0,0,1,9.8,5.66l8.79,32.77a8,8,0,0,1-11.73,9l-13.88-8L33.11,188A8,8,0,0,0,40,200H88A8,8,0,0,1,96,208ZM128,32a7.85,7.85,0,0,1,6.92,4l28,48.3-13.82,8A8,8,0,0,0,151,106.92l32.78,8.79a8.23,8.23,0,0,0,2.07.27,8,8,0,0,0,7.72-5.93l8.79-32.79a8,8,0,0,0-11.72-9l-13.89,8L148.77,28a24,24,0,0,0-41.54,0L84.07,68a8,8,0,0,0,13.85,8l23.16-40A7.85,7.85,0,0,1,128,32ZM236.73,180l-23.14-40a8,8,0,0,0-13.84,8l23.14,40A8,8,0,0,1,216,200H160V184a8,8,0,0,0-13.66-5.66l-24,24a8,8,0,0,0,0,11.32l24,24A8,8,0,0,0,160,232V216h56a24,24,0,0,0,20.77-36Z"/></symbol></svg>
 <script>document.documentElement.classList.add('js')</script>
 
 <header>
   <nav class="wrap" aria-label="Principal">
-    <a class="logo" href="#"><span><i class="ph-fill ph-recycle"></i></span>EcoColeta</a>
+    <a class="logo" href="#"><span><i aria-hidden="true"><svg><use href="#i-recycle-fill"/></svg></i></span>EcoColeta</a>
     <ul>
       <li><a href="#como-funciona">Como funciona</a></li>
       <li><a href="#residuos">Resíduos</a></li>
       <li><a href="#dicas">Dicas</a></li>
       <li><a href="#instalar">Instalar</a></li>
     </ul>
-    <a class="btn btn-primary" href="https://github.com/rafaellourenco10/ecocoleta_app/releases/latest/download/app-release.apk" data-apk><i class="ph ph-download-simple"></i>Baixar APK</a>
+    <a class="btn btn-primary" href="https://github.com/rafaellourenco10/ecocoleta_app/releases/latest/download/app-release.apk" data-apk><i aria-hidden="true"><svg><use href="#i-download-simple"/></svg></i>Baixar APK</a>
   </nav>
 </header>
 
@@ -245,13 +258,13 @@ footer a { color: var(--text); font-weight: 500; }
         <h1>Descarte do jeito certo, <em>sem sair de casa.</em></h1>
         <p>Peça a coleta de eletrônicos, entulho e recicláveis pelo celular. Uma foto, o endereço e pronto.</p>
         <div class="cta-row">
-          <a class="btn btn-primary" href="https://github.com/rafaellourenco10/ecocoleta_app/releases/latest/download/app-release.apk" data-apk><i class="ph ph-android-logo"></i>Baixar APK</a>
+          <a class="btn btn-primary" href="https://github.com/rafaellourenco10/ecocoleta_app/releases/latest/download/app-release.apk" data-apk><i aria-hidden="true"><svg><use href="#i-android-logo"/></svg></i>Baixar APK</a>
           <a class="btn btn-ghost" href="#instalar">Como instalar</a>
         </div>
       </div>
       <div class="hero-visual">
-        <div class="phone" data-print="tela-inicial.png">
-          <img src="img/tela-inicial.png" alt="Tela inicial do EcoColeta com os atalhos Solicitar Coleta, Minhas Coletas, Meu Perfil e Dicas de Descarte" width="270" height="585" onerror="this.remove()">
+        <div class="phone" data-print="tela-inicial.webp">
+          <img src="img/tela-inicial.webp" alt="Tela inicial do EcoColeta com os atalhos Solicitar Coleta, Minhas Coletas, Meu Perfil e Dicas de Descarte" width="270" height="585" onerror="this.remove()">
         </div>
       </div>
     </div>
@@ -259,15 +272,15 @@ footer a { color: var(--text); font-weight: 500; }
 
   <section class="how" id="como-funciona">
     <div class="wrap">
-      <div class="phone reveal" data-print="tela-solicitacao.png">
-        <img src="img/tela-solicitacao.png" alt="Formulário de nova solicitação de coleta com tipo de resíduo, volume, acondicionamento, foto e endereço" width="240" height="520" loading="lazy" onerror="this.remove()">
+      <div class="phone reveal" data-print="tela-solicitacao.webp">
+        <img src="img/tela-solicitacao.webp" alt="Formulário de nova solicitação de coleta com tipo de resíduo, volume, acondicionamento, foto e endereço" width="240" height="520" loading="lazy" onerror="this.remove()">
       </div>
       <div class="reveal">
         <h2>Três passos até a coleta.</h2>
         <ol class="steps">
-          <li><i class="ph ph-user-circle-plus"></i><div><h3>Crie sua conta</h3><p>Cadastro para pessoa física ou empresa, com CPF ou CNPJ, telefone e endereço.</p></div></li>
-          <li><i class="ph ph-camera"></i><div><h3>Descreva o descarte</h3><p>Escolha o tipo de resíduo, o volume e como ele está guardado. Uma foto ajuda a equipe a se preparar.</p></div></li>
-          <li><i class="ph ph-list-checks"></i><div><h3>Acompanhe o pedido</h3><p>Veja suas solicitações, edite os detalhes ou cancele quando precisar.</p></div></li>
+          <li><i aria-hidden="true"><svg><use href="#i-user-circle-plus"/></svg></i><div><h3>Crie sua conta</h3><p>Cadastro para pessoa física ou empresa, com CPF ou CNPJ, telefone e endereço.</p></div></li>
+          <li><i aria-hidden="true"><svg><use href="#i-camera"/></svg></i><div><h3>Descreva o descarte</h3><p>Escolha o tipo de resíduo, o volume e como ele está guardado. Uma foto ajuda a equipe a se preparar.</p></div></li>
+          <li><i aria-hidden="true"><svg><use href="#i-list-checks"/></svg></i><div><h3>Acompanhe o pedido</h3><p>Veja suas solicitações, edite os detalhes ou cancele quando precisar.</p></div></li>
         </ol>
       </div>
     </div>
@@ -277,11 +290,11 @@ footer a { color: var(--text); font-weight: 500; }
     <div class="wrap">
       <h2 class="reveal">O que dá para descartar.</h2>
       <div class="bento reveal">
-        <div class="tile big"><i class="ph ph-desktop"></i><h3>Eletrônicos</h3><p>Computadores, celulares, cabos e eletrodomésticos. Eles contêm metais pesados e não podem ir para o lixo comum.</p></div>
-        <div class="tile dots"><i class="ph ph-barricade"></i><h3>Construção civil</h3><p>Entulho e restos de obra ou reforma, de meio metro cúbico a mais de 1 m³.</p></div>
-        <div class="tile"><i class="ph ph-recycle"></i><h3>Recicláveis</h3><p>Papel, plástico, metal e vidro separados para reaproveitamento.</p></div>
-        <div class="tile tint"><i class="ph ph-leaf"></i><h3>Orgânicos</h3><p>Restos de alimentos e de jardim em volume maior que o da coleta comum.</p></div>
-        <div class="tile"><i class="ph ph-first-aid-kit"></i><h3>Infectantes</h3><p>Material com risco biológico, que precisa de coleta separada.</p></div>
+        <div class="tile big"><i aria-hidden="true"><svg><use href="#i-desktop"/></svg></i><h3>Eletrônicos</h3><p>Computadores, celulares, cabos e eletrodomésticos. Eles contêm metais pesados e não podem ir para o lixo comum.</p></div>
+        <div class="tile dots"><i aria-hidden="true"><svg><use href="#i-barricade"/></svg></i><h3>Construção civil</h3><p>Entulho e restos de obra ou reforma, de meio metro cúbico a mais de 1 m³.</p></div>
+        <div class="tile"><i aria-hidden="true"><svg><use href="#i-recycle"/></svg></i><h3>Recicláveis</h3><p>Papel, plástico, metal e vidro separados para reaproveitamento.</p></div>
+        <div class="tile tint"><i aria-hidden="true"><svg><use href="#i-leaf"/></svg></i><h3>Orgânicos</h3><p>Restos de alimentos e de jardim em volume maior que o da coleta comum.</p></div>
+        <div class="tile"><i aria-hidden="true"><svg><use href="#i-first-aid-kit"/></svg></i><h3>Infectantes</h3><p>Material com risco biológico, que precisa de coleta separada.</p></div>
       </div>
     </div>
   </section>
@@ -291,23 +304,23 @@ footer a { color: var(--text); font-weight: 500; }
       <h2 class="reveal">Cada material tem um destino certo.</h2>
       <div class="tips-list reveal">
         <details>
-          <summary><i class="ph ph-desktop"></i>Eletrônicos<i class="ph ph-caret-down chev"></i></summary>
+          <summary><i aria-hidden="true"><svg><use href="#i-desktop"/></svg></i>Eletrônicos<i class="chev" aria-hidden="true"><svg><use href="#i-caret-down"/></svg></i></summary>
           <p>Nunca descarte no lixo comum. Eles contêm metais pesados que contaminam o solo. Agende a coleta pelo app ou leve a um ecoponto.</p>
         </details>
         <details>
-          <summary><i class="ph ph-drop"></i>Óleo de cozinha<i class="ph ph-caret-down chev"></i></summary>
+          <summary><i aria-hidden="true"><svg><use href="#i-drop"/></svg></i>Óleo de cozinha<i class="chev" aria-hidden="true"><svg><use href="#i-caret-down"/></svg></i></summary>
           <p>Um litro de óleo contamina até 25 mil litros de água. Espere esfriar, guarde em uma garrafa PET e entregue para coleta especial ou ONGs que fazem sabão.</p>
         </details>
         <details>
-          <summary><i class="ph ph-battery-warning"></i>Pilhas e baterias<i class="ph ph-caret-down chev"></i></summary>
+          <summary><i aria-hidden="true"><svg><use href="#i-battery-warning"/></svg></i>Pilhas e baterias<i class="chev" aria-hidden="true"><svg><use href="#i-caret-down"/></svg></i></summary>
           <p>São muito tóxicas. Lojas de eletrônicos, supermercados e farmácias costumam ter coletores específicos (logística reversa).</p>
         </details>
         <details>
-          <summary><i class="ph ph-warning"></i>Vidros quebrados<i class="ph ph-caret-down chev"></i></summary>
+          <summary><i aria-hidden="true"><svg><use href="#i-warning"/></svg></i>Vidros quebrados<i class="chev" aria-hidden="true"><svg><use href="#i-caret-down"/></svg></i></summary>
           <p>Para não machucar os coletores, enrole os cacos em jornal ou coloque em uma caixa de papelão ou garrafa PET cortada, com um aviso.</p>
         </details>
         <details>
-          <summary><i class="ph ph-pill"></i>Remédios vencidos<i class="ph ph-caret-down chev"></i></summary>
+          <summary><i aria-hidden="true"><svg><use href="#i-pill"/></svg></i>Remédios vencidos<i class="chev" aria-hidden="true"><svg><use href="#i-caret-down"/></svg></i></summary>
           <p>Não jogue no vaso nem no lixo comum, porque os resíduos químicos contaminam a água. Leve a qualquer farmácia.</p>
         </details>
       </div>
@@ -320,9 +333,9 @@ footer a { color: var(--text); font-weight: 500; }
         <p class="eyebrow">Para Android</p>
         <h2>Instale em menos de um minuto.</h2>
         <p class="lead">O EcoColeta é gratuito e é instalado direto pelo arquivo APK, sem passar pela Play Store.</p>
-        <a class="btn btn-primary" href="https://github.com/rafaellourenco10/ecocoleta_app/releases/latest/download/app-release.apk" data-apk><i class="ph ph-download-simple"></i>Baixar APK</a>
+        <a class="btn btn-primary" href="https://github.com/rafaellourenco10/ecocoleta_app/releases/latest/download/app-release.apk" data-apk><i aria-hidden="true"><svg><use href="#i-download-simple"/></svg></i>Baixar APK</a>
         <p class="meta">Versão 2.0.0. Disponível apenas para Android.</p>
-        <p class="note ios-only"><i class="ph ph-device-mobile"></i>Você está em um iPhone. Por enquanto o EcoColeta existe só para Android.</p>
+        <p class="note ios-only"><i aria-hidden="true"><svg><use href="#i-device-mobile"/></svg></i>Você está em um iPhone. Por enquanto o EcoColeta existe só para Android.</p>
       </div>
       <div class="reveal">
         <ol>
@@ -330,7 +343,7 @@ footer a { color: var(--text); font-weight: 500; }
           <li><div><strong>Permita a instalação</strong><span>Abra o arquivo. Se o Android pedir, autorize instalar apps desta fonte.</span></div></li>
           <li><div><strong>Instale e entre</strong><span>Toque em Instalar, abra o EcoColeta e crie sua conta.</span></div></li>
         </ol>
-        <p class="note"><i class="ph ph-shield-check"></i>O aviso de "fonte desconhecida" aparece porque o app não está na Play Store. O arquivo é assinado pela equipe do EcoColeta.</p>
+        <p class="note"><i aria-hidden="true"><svg><use href="#i-shield-check"/></svg></i>O aviso de "fonte desconhecida" aparece porque o app não está na Play Store. O arquivo é assinado pela equipe do EcoColeta.</p>
       </div>
     </div>
   </section>
@@ -338,7 +351,7 @@ footer a { color: var(--text); font-weight: 500; }
 
 <footer>
   <div class="wrap">
-    <a class="logo" href="#"><span><i class="ph-fill ph-recycle"></i></span>EcoColeta</a>
+    <a class="logo" href="#"><span><i aria-hidden="true"><svg><use href="#i-recycle-fill"/></svg></i></span>EcoColeta</a>
     <p>Feito por Rafael R. Lourenço, Guilherme, Geovanni e João Wilson.</p>
     <a href="https://github.com/rafaellourenco10/ecocoleta_app">Código no GitHub</a>
   </div>

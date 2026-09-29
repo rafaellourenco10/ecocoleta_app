@@ -1,0 +1,5 @@
+# Netlify publica só a landing page; o resto do repositório (app Flutter) é ignorado
+[build]
+  base = "site"
+  publish = "."
+  command = ""
