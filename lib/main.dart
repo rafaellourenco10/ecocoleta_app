@@ -15,6 +15,11 @@ class EcoColetaApp extends StatelessWidget {
       title: 'EcoColeta',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      // Android 15 desenha o app atrás da barra de navegação; isso reserva o espaço em todas as telas
+      builder: (context, child) => ColoredBox(
+        color: AppColors.background,
+        child: SafeArea(top: false, child: child!),
+      ),
       home: const TelaLogin(),
     );
   }
