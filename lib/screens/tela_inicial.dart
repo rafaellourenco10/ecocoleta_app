@@ -72,7 +72,7 @@ class _TelaInicialState extends State<TelaInicial> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Olá, ${widget.nomeUsuario}!',
+                          'Bem-vindo, ${widget.nomeUsuario}!',
                           style: textTheme.headlineSmall?.copyWith(color: Colors.white),
                         ),
                         const SizedBox(height: 6),

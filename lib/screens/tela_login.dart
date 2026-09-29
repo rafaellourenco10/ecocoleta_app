@@ -22,7 +22,7 @@ class _TelaLoginState extends State<TelaLogin> {
       context,
       MaterialPageRoute(
         builder: (context) => const TelaInicial(
-          nomeUsuario: 'Visitante (Teste)',
+          nomeUsuario: 'Rafael',
           usuarioId: 'teste123', // ID de teste
         ),
       ),
