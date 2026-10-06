@@ -24,9 +24,9 @@
 O **EcoColeta** é um aplicativo de zeladoria urbana que conecta cidadãos e empresas à coleta de descartes específicos (eletrônicos, recicláveis, entulho, orgânicos e outros). A pessoa informa o tipo de resíduo, o volume, o endereço e uma foto, e acompanha o pedido pelo app.
 
 <p align="center">
-  <img src="site/img/tela-inicial.webp" alt="Tela inicial do app" width="260">
+  <img src="site/img/tela-inicial.webp" alt="Tela inicial do app" height="500">
   &nbsp;&nbsp;
-  <img src="site/img/tela-solicitacao.webp" alt="Tela de solicitação de coleta" width="260">
+  <img src="site/img/tela-solicitacao.webp" alt="Tela de solicitação de coleta" height="500">
 </p>
 
 ---
